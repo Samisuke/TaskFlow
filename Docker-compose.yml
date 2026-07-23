@@ -1,0 +1,36 @@
+services:
+  # Base de datos
+  db:
+    image: postgres:16
+    container_name: taksflow-db
+    restart: always
+    environment:
+      POSTGRES_DB: TaskFlowDb
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d TaskFlowDb"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  # API
+  api:
+    build:
+      context: .
+      dockerfile: TaskFlow.Api/Dockerfile
+    container_name: taksflow-api
+    ports:
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Database=TaksFlowDb;Username=postgres;Password=postgres
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
