@@ -8,8 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Inyección del context
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<TaskFlowDbContext>(options => 
+builder.Services.AddDbContext<TaskFlowDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
