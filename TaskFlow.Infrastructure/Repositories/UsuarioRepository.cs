@@ -8,11 +8,13 @@ namespace TaskFlow.Infrastructure.Repositories
 {
     public class UsuarioReposity : IUsuarioRepository
     {
+        // Inyección del context
         private readonly TaskFlowDbContext _context;
         public UsuarioReposity(TaskFlowDbContext context)
         {
             _context = context;
         }
+
         // Obtención de usuarios
         public async Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync()
         {
@@ -52,7 +54,7 @@ namespace TaskFlow.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        //
+        // Misc.
 
         public async Task CrearUnUsuarioNuevoAsync(Usuario usuario)
         {

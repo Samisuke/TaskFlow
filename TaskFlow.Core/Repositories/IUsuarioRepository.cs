@@ -10,7 +10,7 @@ namespace TaskFlow.Core.Repositories
         Task <Usuario?> ObtenerUsuarioPorIdAsync(int idUsuario);
         Task <Usuario?> ObtenerUsuarioPorEmailAsync(string email);
 
-        //
+        // Misc.
 
         Task CrearUnUsuarioNuevoAsync(Usuario usuario);
         Task <bool> GuardarCambiosAsync();
