@@ -18,10 +18,6 @@ namespace TaskFlow.Infrastructure.Services
         // Métodos GET
         public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnUsuarioAsync(int idUsuario)
         {
-            // Comprobar que el usuario existe
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
-            if (usuario is null) return Result<IEnumerable<Comentario>>.Mal("ERROR. No se encuentra el usuario");
-
             // Sacar los comentarios del usuario
             var comentarios = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(idUsuario);
             if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("ERROR. El usuario no tiene comentarios.");
@@ -31,9 +27,6 @@ namespace TaskFlow.Infrastructure.Services
 
         public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnaTareaAsync(int idTarea)
         {
-            // Comprobar que la tarea existe
-
-
             // Sacar los comentarios de la tarea
             var comentarios = await _repoComentario.ObtenerComentariosDeUnaTareaAsync(idTarea);
             if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("ERROR. No hay comentarios en esta tarea.");

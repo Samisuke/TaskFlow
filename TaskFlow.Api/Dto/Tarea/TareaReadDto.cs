@@ -8,7 +8,7 @@ namespace TaskFlow.Api.Dto.Tarea
         public string Estado {get; set;} = string.Empty;
         public string Prioridad {get; set;} = string.Empty;
         public DateTime FechaCreacion {get; set;}
-        public DateTime FechaLimite {get; set;}
+        public DateTimeOffset FechaLimite {get; set;}
         public TareaReadDtoUsuarioAsignado Asignado {get; set;} = null!;
         public TareaReadDtoUsuarioCreador Creador {get; set;} = null!;
         public TareaReadDtoProyecto Proyecto {get; set;} = null!;

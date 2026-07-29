@@ -8,7 +8,7 @@ namespace TaskFlow.Api.Dto.Tarea
         public string Descripcion {get; set;} = string.Empty;
         public EstadoTarea Estado {get; set;}
         public PrioridadTarea Prioridad {get; set;}
-        public DateTime FechaLimite {get; set;}
+        public DateTimeOffset FechaLimite {get; set;}
         public int AsignadoId {get; set;}
     }
 }

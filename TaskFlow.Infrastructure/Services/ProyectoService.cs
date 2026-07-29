@@ -20,10 +20,6 @@ namespace TaskFlow.Infrastructure.Services
         // Métodos GET
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int idUsuario)
         {
-            // Comprobar que el usuario existe
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
-            if (usuario is null) return Result<IEnumerable<Proyecto>>.Mal("ERROR. No se encuentra el usuario.");
-
             // Sacar los proyectos del usuario
             var proyectos = await _repoProyecto.ObtenerProyectosDeUnUsuarioAsync(idUsuario);
             if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("ERROR. Este usuario no pertenece a ningún proyecto aun.");
@@ -33,10 +29,6 @@ namespace TaskFlow.Infrastructure.Services
 
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int idCreador)
         {
-            // Comprobar que el usuario existe
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idCreador);
-            if (usuario is null) return Result<IEnumerable<Proyecto>>.Mal("ERROR. No se encuentra el usuario creador.");
-
             // Sacar los proyectos del usuario
             var proyectos = await _repoProyecto.ObtenerProyectosDeUnCreadorAsync(idCreador);
             if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("ERROR. Este usuario no tiene proyectos creados.");

@@ -14,7 +14,7 @@ namespace TaskFlow.Core.Models
         public EstadoTarea Estado {get; set;}
         public PrioridadTarea Prioridad {get; set;}
         public DateTime FechaCreacion {get; set;}
-        public DateTime FechaLimite {get; set;}
+        public DateTimeOffset FechaLimite {get; set;}
         public int ProyectoId {get; set;}
         public Proyecto? Proyecto {get; set;}
         public int AsignadoId {get; set;}

@@ -28,11 +28,6 @@ namespace TaskFlow.Infrastructure.Services
 
         public async Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosUsuariosPorProyectoAsync(int idProyecto)
         {
-            // Comprobar que proyecto existe
-            var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
-            if (proyecto is null) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. No se encuentra el proyecto.");
-
-            // Sacar los usuarios del proyecto
             var usuarios = await _repoUsuario.ObtenerTodosUsuariosDeProyectoAsync(idProyecto);
             if (usuarios is null) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. No se encuentra el proyecto.");
             if (!usuarios.Any()) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. La lista está vacía.");
