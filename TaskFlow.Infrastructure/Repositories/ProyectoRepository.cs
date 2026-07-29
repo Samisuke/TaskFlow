@@ -13,7 +13,7 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             _context = context;
         }
-        // Métodos GET
+
         // Proyectos con sus usuarios completos, tareas y etiquetas.
         public async Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnUsuarioAsync(int idUsuario)
         {

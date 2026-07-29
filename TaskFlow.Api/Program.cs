@@ -20,6 +20,8 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioReposity>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
+builder.Services.AddScoped<IComentarioRepository, IComentarioRepository>();
+builder.Services.AddScoped<IComentarioService, ComentarioService>();
 
 // Inyección del context
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>

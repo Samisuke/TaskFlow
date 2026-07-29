@@ -2,6 +2,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Models;
+using Taskflow.Core.Repositories;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -9,9 +10,11 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección del repositorio
         private readonly IUsuarioRepository _repoUsuario;
-        public UsuarioService(IUsuarioRepository repoUsuario)
+        private readonly IProyectoRepository _repoProyecto;
+        public UsuarioService(IUsuarioRepository repoUsuario, IProyectoRepository repoProyecto)
         {
             _repoUsuario = repoUsuario;
+            _repoProyecto = repoProyecto;
         }
 
         // Métodos GET
@@ -25,6 +28,11 @@ namespace TaskFlow.Infrastructure.Services
 
         public async Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosUsuariosPorProyectoAsync(int idProyecto)
         {
+            // Comprobar que proyecto existe
+            var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
+            if (proyecto is null) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. No se encuentra el proyecto.");
+
+            // Sacar los usuarios del proyecto
             var usuarios = await _repoUsuario.ObtenerTodosUsuariosDeProyectoAsync(idProyecto);
             if (usuarios is null) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. No se encuentra el proyecto.");
             if (!usuarios.Any()) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. La lista está vacía.");
@@ -34,6 +42,7 @@ namespace TaskFlow.Infrastructure.Services
 
         public async Task<Result<Usuario>> GetUsuarioPorIdAsync(int idUsuario)
         {
+            
             var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
             if (usuario is null) return Result<Usuario>.Mal("ERROR. No se encuentra el usuario.");
 

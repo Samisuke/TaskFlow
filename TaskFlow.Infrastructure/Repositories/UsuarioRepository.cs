@@ -15,7 +15,6 @@ namespace TaskFlow.Infrastructure.Repositories
             _context = context;
         }
 
-        //GET
         // Todos los usuarios simples con sus proyectos, sin informacion adicional.
         public async Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync()
         {
