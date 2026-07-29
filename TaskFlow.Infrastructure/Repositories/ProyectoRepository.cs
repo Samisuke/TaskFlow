@@ -7,13 +7,14 @@ namespace TaskFlow.Infrastructure.Repositories
 {
     public class ProyectoRepository : IProyectoRepository
     {
+        // Inyección del context
         private readonly TaskFlowDbContext _context;
         public ProyectoRepository(TaskFlowDbContext context)
         {
             _context = context;
         }
-        // GET
-        // Proyectos con sus usuarios completos, tareas y etiquetas
+        // Métodos GET
+        // Proyectos con sus usuarios completos, tareas y etiquetas.
         public async Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnUsuarioAsync(int idUsuario)
         {
             return await _context.Proyectos
@@ -27,12 +28,18 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync(); 
         }
 
-       // Proyectos simples 
+        // Proyectos simples de un creador, sin informacion adicional.
         public async Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnCreadorAsync(int idCreador)
         {
             return await _context.Proyectos
                 .Where(x => x.PropietarioId == idCreador)
                 .ToListAsync();
+        }
+
+        // Proyectos simples por ID de proyecto, sin informacion adicional.
+        public async Task <Proyecto?> ObtenerProyectoPorIdAsync(int idProyecto)
+        {
+            return await _context.Proyectos.FindAsync(idProyecto);
         }
 
         // Misc.

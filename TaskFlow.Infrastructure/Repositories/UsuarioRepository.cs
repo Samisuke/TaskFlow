@@ -15,17 +15,16 @@ namespace TaskFlow.Infrastructure.Repositories
             _context = context;
         }
 
-        // Obtención de usuarios
+        //GET
+        // Todos los usuarios simples con sus proyectos, sin informacion adicional.
         public async Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync()
         {
             return await _context.Usuarios
                 .Include(u => u.Proyectos)
-                .Include(u => u.Comentarios)
-                .Include(u => u.TareasAsignadas)
-                .Include(u => u.TareasCreadas)
                 .ToListAsync();
         }
 
+        // Todos los usuarios de un proyecto, sin informacion adicional.
         public async Task <IEnumerable<ProyectoUsuario>> ObtenerTodosUsuariosDeProyectoAsync(int idProyecto)
         {
             return await _context.ProyectoUsuario
@@ -35,6 +34,7 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync();
         }
         
+        // Usuario completo por ID
         public async Task <Usuario?> ObtenerUsuarioPorIdAsync(int idUsuario)
         {
             return await _context.Usuarios
@@ -44,6 +44,8 @@ namespace TaskFlow.Infrastructure.Repositories
                 .Include(u => u.TareasCreadas)
                 .FirstOrDefaultAsync(u => u.Id == idUsuario);
         }
+
+        // Usuario completo por email
         public async Task <Usuario?> ObtenerUsuarioPorEmailAsync(string email)
         {
            return await _context.Usuarios
@@ -55,7 +57,6 @@ namespace TaskFlow.Infrastructure.Repositories
         }
 
         // Misc.
-
         public async Task CrearUnUsuarioNuevoAsync(Usuario usuario)
         {
             await _context.Usuarios.AddAsync(usuario);

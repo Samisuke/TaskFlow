@@ -110,10 +110,10 @@ namespace TaskFlow.Infrastructure.Services
                 numeroCambios += 1;
             } 
 
+            if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios.");
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-            if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios.");
-
+            
             return Result<Usuario>.Bien(usuario);
         }
 
@@ -130,9 +130,9 @@ namespace TaskFlow.Infrastructure.Services
                 numeroCambios += 1;
             } 
 
+            if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios");
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-            if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se gab detectado cambios");
 
             return Result<Usuario>.Bien(usuario);
         }

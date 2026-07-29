@@ -11,7 +11,6 @@ namespace TaskFlow.Core.Repositories
         Task <Usuario?> ObtenerUsuarioPorEmailAsync(string email);
 
         // Misc.
-
         Task CrearUnUsuarioNuevoAsync(Usuario usuario);
         Task <bool> GuardarCambiosAsync();
     }

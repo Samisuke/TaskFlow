@@ -1,6 +1,6 @@
 namespace TaskFlow.Api.Dto.Usuario
 {
-    public class UsuarioPDto
+    public class UsuarioPatchDto
     {
         public string Nombre {get; set;} = string.Empty;
         public string Apellidos {get; set;} = string.Empty;

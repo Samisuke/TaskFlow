@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.Infrastructure.Data;
+using TaskFlow.Api.Config.MapsterConfig;
+
 using TaskFlow.Infrastructure.Services;
 using TaskFlow.Infrastructure.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Repositories;
-using TaskFlow.Api.Config.MapsterConfig;
 using Taskflow.Core.Repositories;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioReposity>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
+builder.Services.AddScoped<IProyectoService, ProyectoService>();
 
 // Inyección del context
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>
