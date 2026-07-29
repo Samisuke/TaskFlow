@@ -7,7 +7,6 @@ using TaskFlow.Infrastructure.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Repositories;
 using Taskflow.Core.Repositories;
-using Task.Infrastructure.Service;
 
 
 
@@ -21,7 +20,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioReposity>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
-builder.Services.AddScoped<IComentarioRepository, IComentarioRepository>();
+builder.Services.AddScoped<IComentarioRepository, ComentarioRepository>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
 builder.Services.AddScoped<ITareaRepository, TareaRepository>();
 builder.Services.AddScoped<ITareaService, TareaService>();

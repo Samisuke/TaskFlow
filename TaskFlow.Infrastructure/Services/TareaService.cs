@@ -6,7 +6,7 @@ using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 
 
-namespace Task.Infrastructure.Service
+namespace TaskFlow.Infrastructure.Services
 {
     public class TareaService : ITareaService
     {
