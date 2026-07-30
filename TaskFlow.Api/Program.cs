@@ -24,6 +24,10 @@ builder.Services.AddScoped<IComentarioRepository, ComentarioRepository>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
 builder.Services.AddScoped<ITareaRepository, TareaRepository>();
 builder.Services.AddScoped<ITareaService, TareaService>();
+builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
+builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
+builder.Services.AddScoped<IHistorialRepository, HistorialRepository>();
+builder.Services.AddScoped<IHistorialService, HistorialService>();
 
 // Inyección del context
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>

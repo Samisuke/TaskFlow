@@ -11,7 +11,6 @@ namespace TaskFlow.Core.Models
         public Tarea? Tarea {get; set;}
         public string Accion {get; set;} = string.Empty;
         public DateTime Fecha {get; set;}
-
         public int UsuarioId {get; set;}
         public Usuario? Usuario {get; set;}
     }
