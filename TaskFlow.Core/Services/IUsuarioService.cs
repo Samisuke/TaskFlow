@@ -8,7 +8,6 @@ namespace TaskFlow.Core.Services
     {
         // Métodos GET
         Task<Result<IEnumerable<Usuario>>> GetTodosUsuariosAsync();
-        Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosUsuariosPorProyectoAsync(int idProyecto);
         Task<Result<Usuario>> GetUsuarioPorIdAsync(int idUsuario);
         Task<Result<Usuario>> GetUsuarioPorEmailAsync(string emailUsuario);
         

@@ -6,7 +6,6 @@ namespace TaskFlow.Core.Repositories
     {   
         // Obtención de usuarios
         Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync();
-        Task <IEnumerable<ProyectoUsuario>> ObtenerTodosUsuariosDeProyectoAsync(int idProyecto);
         Task <Usuario?> ObtenerUsuarioPorIdAsync(int idUsuario);
         Task <Usuario?> ObtenerUsuarioPorEmailAsync(string email);
 

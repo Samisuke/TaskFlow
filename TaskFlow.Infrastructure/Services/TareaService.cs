@@ -19,6 +19,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos GET
+        // Obtener tus propias tareas pendientes. Útil para ver desde tu perfil que tienes por hacer.
         public async Task <Result<IEnumerable<Tarea>>> GetTareasPendientesDeUsuarioAsync(int idUsuario)
         {
             var tareas = await _repoTarea.ObtenerTareasPendientesPorUsuarioIdAsync(idUsuario);
@@ -27,6 +28,7 @@ namespace TaskFlow.Infrastructure.Services
             return Result <IEnumerable<Tarea>>.Bien(tareas);
         }
 
+        // Obtener tus tareas dadas. Útil para ver desde tu perfil el estado de las tareas que has mandado.
         public async Task<Result<IEnumerable<Tarea>>> GetTareasDadasDeUsuarioAsync(int idUsuario)
         {
             var tareas = await _repoTarea.ObtenerTareasDadasPorUsuarioIdAsync(idUsuario);
@@ -35,6 +37,7 @@ namespace TaskFlow.Infrastructure.Services
             return Result<IEnumerable<Tarea>>.Bien(tareas);
         }
 
+        // Obtener todas las tareas de un proyecto. Útil para ver el estado del proyecto de un solo vistazo.
         public async Task<Result<IEnumerable<Tarea>>> GetTareasDeUnProyectoAsync(int idProyecto)
         {
             var tareas = await _repoTarea.ObtenerTareasDeUnProyectoAsync(idProyecto);
@@ -43,6 +46,7 @@ namespace TaskFlow.Infrastructure.Services
             return Result<IEnumerable<Tarea>>.Bien(tareas);
         }
 
+        // Obtener una sola tarea. Útil para ver mas detalladamente y con más información una tarea concreta.
         public async Task <Result<Tarea?>> GetTareaPorIdAsync(int id)
         {
             var tarea = await _repoTarea.ObtenerTareaPorIdAsync(id);
@@ -52,6 +56,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos POST
+        // Crear una tarea
         public async Task <Result<Tarea>> PostTareaAsync(
             int idPropia,
             string tituloTarea,
@@ -81,10 +86,10 @@ namespace TaskFlow.Infrastructure.Services
             if (!guardadoExistoso) return Result<Tarea>.Mal("ERROR. Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
 
             return Result<Tarea>.Bien(tarea);
-
         }
 
         // Métodos PATCH
+        // Modificar una tarea.
         public async Task <Result<Tarea>> PatchTareaAsync(
             int id,
             string? tituloTarea,

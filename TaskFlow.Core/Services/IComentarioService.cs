@@ -14,7 +14,9 @@ namespace TaskFlow.Core.Services
         Task <Result<Comentario>> PostComentarioAsync(
             string contenidoComentario,
             int usuarioId,
-            int tareaId);
+            int tareaId
+        );
+
         // Métodos PATCH
         Task <Result<Comentario>> PatchComentarioAsync(int id, string contenidoComentario);
     }

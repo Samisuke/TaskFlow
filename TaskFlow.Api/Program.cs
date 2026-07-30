@@ -27,7 +27,9 @@ builder.Services.AddScoped<ITareaService, TareaService>();
 builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddScoped<IHistorialRepository, HistorialRepository>();
-builder.Services.AddScoped<IHistorialService, HistorialService>();
+builder.Services.AddScoped<IHIstorialService, HistorialService>();
+builder.Services.AddScoped<IProyectoUsuarioRepository, ProyectoUsuarioRepository>();
+builder.Services.AddScoped<IProyectoUsuarioService, ProyectoUsuarioService>();
 
 // Inyección del context
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>

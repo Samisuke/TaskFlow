@@ -20,8 +20,12 @@ namespace TaskFlow.Core.Services
         Task<Result<Proyecto>> PatchProyectoAsync(
         int idProyecto,
         string? nombreProyecto,
-        string? descripcionProyecto,
-        int? PropietarioId
+        string? descripcionProyecto
+        );
+        Task<Result<Proyecto>> PatchDueñoProyectoAsync(
+        int idPropia,
+        int idProyecto,
+        int PropietarioId
         );
     }
 }

@@ -22,16 +22,6 @@ namespace TaskFlow.Infrastructure.Repositories
                 .Include(u => u.Proyectos)
                 .ToListAsync();
         }
-
-        // Todos los usuarios de un proyecto, sin informacion adicional.
-        public async Task <IEnumerable<ProyectoUsuario>> ObtenerTodosUsuariosDeProyectoAsync(int idProyecto)
-        {
-            return await _context.ProyectoUsuario
-                .Where(u => u.ProyectoId == idProyecto)
-                .Include(u => u.Usuario)
-                .Include(u => u.Proyecto)
-                .ToListAsync();
-        }
         
         // Usuario completo por ID
         public async Task <Usuario?> ObtenerUsuarioPorIdAsync(int idUsuario)

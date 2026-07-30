@@ -17,6 +17,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Peticiones GET
+        // Obtener el historial. Útil para mostrar el historial de cambios que ha sufrido una tarea.
         public async Task<Result<IEnumerable<Historial>>> GetHistorialDeUnaTareaAsync(int idTarea)
         {
             var historial = await _repoHistorial.ObtenerHistorialDeUnaTareaAsync(idTarea);
@@ -26,6 +27,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         //Peticiones POST
+        // Crear un "cambio" en la tarea.
         public async Task<Result<Historial>> PostTareaAsync(
             int tareaId,
             int usuarioId,

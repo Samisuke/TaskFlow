@@ -16,6 +16,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Peticiones GET
+        // Obtener todas las etiquetas de una tarea. Útil para poder mostrarlas de forma rápida
         public async Task<Result<IEnumerable<Etiqueta>>> GetTodasLasEtiquetasDeUnaTareaAsync(int idTarea)
         {
             var etiquetas = await _repoEtiqueta.ObtenerTodasLasEtiquetasDeUnaTareaAsync(idTarea);
@@ -24,6 +25,7 @@ namespace TaskFlow.Infrastructure.Services
             return Result<IEnumerable<Etiqueta>>.Bien(etiquetas);
         }
 
+        // Obtener una etiqueta. Útil si quieres mostrar una etiqueta como sugerencia, por ejemplo.
         public async Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int idEtiqueta)
         {
             var etiqueta = await _repoEtiqueta.ObtenerUnaEtiquetaPorIdAsync(idEtiqueta);
@@ -34,6 +36,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         //Peticiones POST
+        // Crear una etiqueta.
         public async Task<Result<Etiqueta>> PostEtiquetaAsync(
             string nombreEtiqueta,
             string colorEtiqueta

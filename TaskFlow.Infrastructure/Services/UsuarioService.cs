@@ -10,31 +10,22 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección del repositorio
         private readonly IUsuarioRepository _repoUsuario;
-        private readonly IProyectoRepository _repoProyecto;
-        public UsuarioService(IUsuarioRepository repoUsuario, IProyectoRepository repoProyecto)
+        public UsuarioService(IUsuarioRepository repoUsuario)
         {
             _repoUsuario = repoUsuario;
-            _repoProyecto = repoProyecto;
         }
 
         // Métodos GET
+        // Obtener todos los usuarios de la base de datos. Solo útil para gestores de la misma.
         public async Task<Result<IEnumerable<Usuario>>> GetTodosUsuariosAsync()
         {
             var usuarios = await _repoUsuario.ObtenerTodosUsuariosAsync();
-            if (!usuarios.Any()) return Result<IEnumerable<Usuario>>.Mal("ERROR. La lista está vacía.");
+            if (!usuarios.Any()) return Result<IEnumerable<Usuario>>.Mal("La lista está vacía.");
 
             return Result<IEnumerable<Usuario>>.Bien(usuarios);
         }
 
-        public async Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosUsuariosPorProyectoAsync(int idProyecto)
-        {
-            var usuarios = await _repoUsuario.ObtenerTodosUsuariosDeProyectoAsync(idProyecto);
-            if (usuarios is null) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. No se encuentra el proyecto.");
-            if (!usuarios.Any()) return Result<IEnumerable<ProyectoUsuario>>.Mal("ERROR. La lista está vacía.");
-
-            return Result<IEnumerable<ProyectoUsuario>>.Bien(usuarios);
-        }
-
+        // Obtener un usuario concreto. Útil para ver tu perfil de usuario.
         public async Task<Result<Usuario>> GetUsuarioPorIdAsync(int idUsuario)
         {
             
@@ -44,6 +35,7 @@ namespace TaskFlow.Infrastructure.Services
             return Result<Usuario>.Bien(usuario);
         }
 
+        // Obtener un usuario por su email. Útil para búsquedas de perfiles de usuario dentro de la aplicación.
         public async Task<Result<Usuario>> GetUsuarioPorEmailAsync(string emailUsuario)
         {
             var usuario = await _repoUsuario.ObtenerUsuarioPorEmailAsync(emailUsuario);
@@ -53,6 +45,7 @@ namespace TaskFlow.Infrastructure.Services
         }
         
         // Métodos POST
+        // Crear un usuario.
         public async Task<Result<Usuario>> PostUsuarioAsync(
             string nombreUsuario,
             string apellidosUsuario,
@@ -79,6 +72,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos PATCH
+        // Modificar un usuario.
         public async Task<Result<Usuario>> PatchUsuarioAsync(
             int idUsuario,
             string? nombreUsuario,

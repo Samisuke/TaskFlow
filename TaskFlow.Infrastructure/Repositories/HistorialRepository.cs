@@ -1,10 +1,11 @@
 using TaskFlow.Infrastructure.Data;
 using TaskFlow.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Taskflow.Core.Repositories;
 
 namespace TaskFlow.Infrastructure.Repositories
 {
-    public class HistorialRepository
+    public class HistorialRepository : IHistorialRepository
     {
         // Inyección del context
         private readonly TaskFlowDbContext _context;

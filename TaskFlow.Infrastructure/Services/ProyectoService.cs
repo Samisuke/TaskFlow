@@ -3,6 +3,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
+using TaskFlow.Core.Enums;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -17,7 +18,9 @@ namespace TaskFlow.Infrastructure.Services
             _repoProyecto = repoProyecto;
             _repoUsuario = repoUsuario;
         }
+
         // Métodos GET
+        // Obtener proyectos a los que pertenece una persona. Útil para ver tus propios proyectos.
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int idUsuario)
         {
             // Sacar los proyectos del usuario
@@ -27,6 +30,7 @@ namespace TaskFlow.Infrastructure.Services
             return Result<IEnumerable<Proyecto>>.Bien(proyectos);
         }
 
+        // Obtener los proyectos creados por una persona concreta. Útil para saber los proyectos de los que eres dueño.
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int idCreador)
         {
             // Sacar los proyectos del usuario
@@ -37,6 +41,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos POST
+        // Crear un proyecto nuevo. Hardcoded que el proyecto solo lo puedas crear siendo tu el propietario.
         public async Task<Result<Proyecto>> PostProyectoAsync(
         string nombreProyecto,
         string descripcionProyecto,
@@ -53,23 +58,23 @@ namespace TaskFlow.Infrastructure.Services
 
             await _repoProyecto.CrearProyectoAsync(proyecto);
             var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
-            if (!guardadoExistoso) return Result<Proyecto>.Mal("ERROR. Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
+            if (!guardadoExistoso) return Result<Proyecto>.Mal("Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
 
             return Result<Proyecto>.Bien(proyecto);
         }
 
         // Métodos PATCH
+        // Modificaciones del proyecto generales.
         public async Task<Result<Proyecto>> PatchProyectoAsync(
         int idProyecto,
         string? nombreProyecto,
-        string? descripcionProyecto,
-        int? PropietarioId
+        string? descripcionProyecto
         )
         {
             int numeroCambios = 0;
 
             var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
-            if (proyecto is null) return Result<Proyecto>.Mal("ERROR. No se encuentra el proyecto.");
+            if (proyecto is null) return Result<Proyecto>.Mal("No se encuentra el proyecto.");
 
             if (nombreProyecto is not null)
             {
@@ -78,19 +83,58 @@ namespace TaskFlow.Infrastructure.Services
             } 
             if (descripcionProyecto is not null)
             {
-                proyecto.Nombre = descripcionProyecto;
+                proyecto.Descripcion = descripcionProyecto;
                 numeroCambios += 1;
             } 
-            if (PropietarioId.HasValue)
-            {
-                var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(PropietarioId.Value);
-                if (usuario is null) return Result<Proyecto>.Mal("ERROR. No se encuentra al usuario.");
 
-                proyecto.PropietarioId = PropietarioId.Value;
-                numeroCambios += 1;
-            }
+            if (numeroCambios == 0) return Result<Proyecto>.Mal("No se han detectado cambios.");
+            var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
+            if (!guardadoExistoso) return Result<Proyecto>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
 
-            if (numeroCambios == 0) return Result<Proyecto>.Mal("ERROR. No se han detectado cambios.");
+            return Result<Proyecto>.Bien(proyecto);
+        }
+
+        // Pasar la posesión del proyecto a otra persona. Contiene comprobaciones básicas.
+        public async Task<Result<Proyecto>> PatchDueñoProyectoAsync(
+        int idPropia,
+        int idProyecto,
+        int PropietarioNuevoId
+        )
+        {
+            int numeroCambios = 0;
+
+            var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
+            if (proyecto is null) return Result<Proyecto>.Mal("No se encuentra el proyecto para transferir.");
+
+            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(PropietarioNuevoId);
+            if (usuario is null) return Result<Proyecto>.Mal("No se encuentra la persona a la que quieres transferir el proyecto.");
+
+            // Comprobación: si no eres el dueño, no puedes pasar la posesión del proyecto.
+            if (proyecto.PropietarioId != idPropia) return Result<Proyecto>.Mal("Solo el propietario puede transferir el proyecto.");
+
+            // Comprobación: Si el proyecto es tuyo no puedes pasartelo a ti mismo.
+            if (proyecto.PropietarioId == PropietarioNuevoId) return Result<Proyecto>.Mal("No puedes obtener un proyecto que ya te pertenece.");
+
+            // Comprobación: Si el nuevo propietario está activo.
+            if (!usuario.Activo) return Result<Proyecto>.Mal("No puedes transferir un proyecto a un miembro inactivo.");
+                    
+            // Comprobación: Si el nuevo propietario no pertenece al proyecto, no puedes pasarlo.
+            if (!proyecto.Usuarios.Any(x => x.UsuarioId == usuario.Id)) return Result<Proyecto>.Mal("No puedes transferir un proyecto a un usuario ajeno al proyecto.");
+
+            // Cambiamos los roles del nuevo propietario y del antiguo.
+            var propietarioActual = proyecto.Usuarios
+                .First(x => x.UsuarioId == idPropia);
+            var nuevoPropietario = proyecto.Usuarios
+                .First(x => x.UsuarioId == PropietarioNuevoId);
+
+            propietarioActual.Rol = RolProyecto.Administrador;
+            nuevoPropietario.Rol = RolProyecto.Manager;
+
+            // Cambiamos el ID en el FK.
+            proyecto.PropietarioId = PropietarioNuevoId;
+            numeroCambios += 1;             
+            
+            if (numeroCambios == 0) return Result<Proyecto>.Mal("No se han detectado cambios.");
             var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
             if (!guardadoExistoso) return Result<Proyecto>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
 

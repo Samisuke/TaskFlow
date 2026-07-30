@@ -36,10 +36,12 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        // Proyectos simples por ID de proyecto, sin informacion adicional.
+        // Proyectos simples por ID de proyecto, con sus usuarios.
         public async Task <Proyecto?> ObtenerProyectoPorIdAsync(int idProyecto)
         {
-            return await _context.Proyectos.FindAsync(idProyecto);
+            return await _context.Proyectos
+            .Include(x => x.Usuarios)
+            .FirstOrDefaultAsync(x => x.Id == idProyecto);
         }
 
         // Misc.
