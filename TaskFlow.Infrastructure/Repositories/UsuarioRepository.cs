@@ -15,6 +15,7 @@ namespace TaskFlow.Infrastructure.Repositories
             _context = context;
         }
 
+        // Métodos GET
         // Todos los usuarios simples con sus proyectos, sin informacion adicional.
         public async Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync()
         {
@@ -45,12 +46,14 @@ namespace TaskFlow.Infrastructure.Repositories
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        // Misc.
+        // Métodos POST
         public async Task CrearUnUsuarioNuevoAsync(Usuario usuario)
         {
             await _context.Usuarios.AddAsync(usuario);
         }
 
+        // Misc.
+        // Guardar
         public async Task <bool> GuardarCambiosAsync()
         {
             return (await _context.SaveChangesAsync()) > 0;

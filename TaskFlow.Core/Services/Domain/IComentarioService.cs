@@ -18,6 +18,6 @@ namespace TaskFlow.Core.Services
         );
 
         // Métodos PATCH
-        Task <Result<Comentario>> PatchComentarioAsync(int id, string contenidoComentario);
+        Task <Result<Comentario>> PatchComentarioAsync(int idPropio, int idComentario, string contenidoComentario);
     }
 }

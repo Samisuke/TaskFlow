@@ -15,7 +15,8 @@ namespace TaskFlow.Infrastructure.Repositories
             _context = context;
         }
 
-        // Peticiones GET
+        // Métodos GET
+        // Ver el historial completo.
         public async Task <IEnumerable<Historial>> ObtenerHistorialDeUnaTareaAsync(int idTarea)
         {
             return await _context.Historiales
@@ -23,12 +24,15 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        // Misc.
+        // Métodos POST
+        // Crear el historial
         public async Task CrearHistorialAsync(Historial historial)
         {
             await _context.AddAsync(historial);
         }
         
+        // Misc.
+        // Guardar
         public async Task <bool> GuardarCambiosAsync()
         {
             return (await _context.SaveChangesAsync()) > 0;

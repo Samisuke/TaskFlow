@@ -5,10 +5,10 @@ namespace TaskFlow.Core.Services
 {
     public interface IHIstorialService
     {
-        // Peticiones GET
+        // Métodos GET
         Task<Result<IEnumerable<Historial>>> GetHistorialDeUnaTareaAsync(int idTarea);
 
-        //Peticiones POST
+        //Métodos POST
         Task<Result<Historial>> PostTareaAsync(
             int tareaId,
             int usuarioId,

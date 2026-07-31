@@ -4,13 +4,15 @@ namespace TaskFlow.Core.Repositories
 {
     public interface IUsuarioRepository
     {   
-        // Obtención de usuarios
+        // GET
         Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync();
         Task <Usuario?> ObtenerUsuarioPorIdAsync(int idUsuario);
         Task <Usuario?> ObtenerUsuarioPorEmailAsync(string email);
 
-        // Misc.
+        // POST
         Task CrearUnUsuarioNuevoAsync(Usuario usuario);
+        
+        // Misc.
         Task <bool> GuardarCambiosAsync();
     }
 }

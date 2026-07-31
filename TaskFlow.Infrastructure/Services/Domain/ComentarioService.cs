@@ -2,6 +2,7 @@ using TaskFlow.Core.Services;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
+using Taskflow.Core.Services;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -9,18 +10,27 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección de repositorios
         private readonly IComentarioRepository _repoComentario;
-        private readonly IUsuarioRepository _repoUsuario;
-        public ComentarioService(IComentarioRepository repoComentario, IUsuarioRepository repoUsuario)
+        private readonly ITareaRepository _repoTarea;
+        private readonly IProyectoPermissionService _proyectoPermission;
+        private readonly IComentarioPermissionService _comentarioPermission;
+        public ComentarioService(
+            IComentarioRepository repoComentario,
+            ITareaRepository repoTarea,
+            IProyectoPermissionService proyectoPermission,
+            IComentarioPermissionService comentarioPermission
+        )
         {
             _repoComentario = repoComentario;
-            _repoUsuario = repoUsuario;
+            _repoTarea = repoTarea;
+            _proyectoPermission = proyectoPermission;
+            _comentarioPermission = comentarioPermission;
         }
         // Métodos GET
         // Obtener los comentarios que ha hecho un usuario. Útil para ver una lsita de tus propios comentarios en las diferentes tareas.
         public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnUsuarioAsync(int idUsuario)
         {
             var comentarios = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(idUsuario);
-            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("ERROR. El usuario no tiene comentarios.");
+            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("EEl usuario no tiene comentarios.");
 
             return Result<IEnumerable<Comentario>>.Bien(comentarios);
         }
@@ -29,7 +39,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnaTareaAsync(int idTarea)
         {
             var comentarios = await _repoComentario.ObtenerComentariosDeUnaTareaAsync(idTarea);
-            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("ERROR. No hay comentarios en esta tarea.");
+            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("No hay comentarios en esta tarea.");
 
             return Result<IEnumerable<Comentario>>.Bien(comentarios);
         }
@@ -38,7 +48,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task <Result<Comentario>> GetComentarioPorIdAsync(int id)
         {
             var comentario = await _repoComentario.ObtenerComentarioPorIdAsync(id);
-            if (comentario is null) return Result<Comentario>.Mal("ERROR. Este comentario no existe.");
+            if (comentario is null) return Result<Comentario>.Mal("Este comentario no existe.");
 
             return Result<Comentario>.Bien(comentario);
         }
@@ -51,6 +61,14 @@ namespace TaskFlow.Infrastructure.Services
         int tareaId
         )
         {
+            // Comprobaciones de existencia.
+            var tarea = await _repoTarea.ObtenerTareaPorIdAsync(tareaId);
+            if (tarea is null) return Result<Comentario>.Mal("La tarea a la que quieres añadir el comentario no existe.");
+
+            // Comprobaciones de proyecto.
+            if (!await _proyectoPermission.EsMiembroActivoAsync(tarea.ProyectoId, usuarioId)) return Result<Comentario>.Mal("No puedes comentar en esta tarea.");
+
+            // Creación de comentario.
             var comentario = new Comentario
             {
                 Contenido = contenidoComentario,
@@ -59,29 +77,37 @@ namespace TaskFlow.Infrastructure.Services
                 TareaId = tareaId
             };
 
+            // Base de datos.
+            await _repoComentario.CrearComentarioAsync(comentario);
             var guardadoExitoso = await _repoComentario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Comentario>.Mal("ERROR. Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
+            if (!guardadoExitoso) return Result<Comentario>.Mal("Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
 
             return Result<Comentario>.Bien(comentario);
         }
 
         // Métodos PATCH
         // Modificar el contenido de un comentario.
-        public async Task <Result<Comentario>> PatchComentarioAsync(int id, string contenidoComentario)
+        public async Task <Result<Comentario>> PatchComentarioAsync(int idPropio, int idComentario, string contenidoComentario)
         {
             int numeroCambios = 0;
-            var comentario = await _repoComentario.ObtenerComentarioPorIdAsync(id);
-            if (comentario is null) return Result<Comentario>.Mal("ERROR. El comentario no existe.");
+            var comentario = await _repoComentario.ObtenerComentarioPorIdAsync(idComentario);
+            if (comentario is null) return Result<Comentario>.Mal("No existe el comentario que quieres modificar.");
+            if (comentario.Tarea is null) return Result<Comentario>.Mal("No existe la tarea del comentario que quieres modificar.");
 
+            // Comprobaciones.
+            if (!await _comentarioPermission.PuedeCambiarComentarioAsync(idPropio, comentario)) return Result<Comentario>.Mal("No puedes modificar este comentario.");
+
+            // Realización de cambios.
             if(contenidoComentario is not null)
             {
                 comentario.Contenido = contenidoComentario;
                 numeroCambios += 1;
             }
             
+            // Base de datos.
             if (numeroCambios == 0) return Result<Comentario>.Mal("ERROR. No se han detectado cambios.");
             var guardadoExitoso = await _repoComentario.GuardarCambiosAsync();
-            if(!guardadoExitoso) return Result<Comentario>.Mal("ERROR. Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
+            if(!guardadoExitoso) return Result<Comentario>.Mal("Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
 
             return Result<Comentario>.Bien(comentario);
         }

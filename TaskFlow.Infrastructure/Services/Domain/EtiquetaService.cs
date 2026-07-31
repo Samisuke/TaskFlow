@@ -16,15 +16,6 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Peticiones GET
-        // Obtener todas las etiquetas de una tarea. Útil para poder mostrarlas de forma rápida
-        public async Task<Result<IEnumerable<Etiqueta>>> GetTodasLasEtiquetasDeUnaTareaAsync(int idTarea)
-        {
-            var etiquetas = await _repoEtiqueta.ObtenerTodasLasEtiquetasDeUnaTareaAsync(idTarea);
-            if(!etiquetas.Any()) return Result<IEnumerable<Etiqueta>>.Mal("La tarea no contiene etiquetas.");
-
-            return Result<IEnumerable<Etiqueta>>.Bien(etiquetas);
-        }
-
         // Obtener una etiqueta. Útil si quieres mostrar una etiqueta como sugerencia, por ejemplo.
         public async Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int idEtiqueta)
         {
@@ -41,7 +32,14 @@ namespace TaskFlow.Infrastructure.Services
             string nombreEtiqueta,
             string colorEtiqueta
         )
-        {
+        {   
+            // Comprobar que la etiqueta no existe ya
+            var comprobarExistente = await _repoEtiqueta.ObtenerEtiquetaPorNombreYColorAsync(nombreEtiqueta, colorEtiqueta);
+
+            // Si ya existe, no la volvemos a crear, mandamos la que ya existia.
+            if (comprobarExistente is not null) return Result<Etiqueta>.Bien(comprobarExistente);
+
+            // Si no existe, la creamos
             var etiqueta = new Etiqueta
             {
                 Nombre = nombreEtiqueta,

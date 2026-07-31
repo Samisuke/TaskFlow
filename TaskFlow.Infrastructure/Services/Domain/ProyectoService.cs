@@ -4,6 +4,7 @@ using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Enums;
+using Taskflow.Core.Services;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -12,11 +13,16 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección del repositorio
         private readonly IProyectoRepository _repoProyecto;
         private readonly IUsuarioRepository _repoUsuario;
+      private readonly IProyectoPermissionService _proyectoPermission;
 
-        public ProyectoService(IProyectoRepository repoProyecto, IUsuarioRepository repoUsuario)
+        public ProyectoService(
+        IProyectoRepository repoProyecto,
+        IUsuarioRepository repoUsuario,
+        IProyectoPermissionService proyectoPermission)
         {
             _repoProyecto = repoProyecto;
             _repoUsuario = repoUsuario;
+            _proyectoPermission = proyectoPermission;
         }
 
         // Métodos GET
@@ -75,7 +81,7 @@ namespace TaskFlow.Infrastructure.Services
 
             var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
             if (proyecto is null) return Result<Proyecto>.Mal("No se encuentra el proyecto.");
-
+            
             if (nombreProyecto is not null)
             {
                 proyecto.Nombre = nombreProyecto;
@@ -101,25 +107,15 @@ namespace TaskFlow.Infrastructure.Services
         int PropietarioNuevoId
         )
         {
-            int numeroCambios = 0;
-
             var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
-            if (proyecto is null) return Result<Proyecto>.Mal("No se encuentra el proyecto para transferir.");
+            var usuarioNuevo = await _repoUsuario.ObtenerUsuarioPorIdAsync(PropietarioNuevoId);
 
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(PropietarioNuevoId);
-            if (usuario is null) return Result<Proyecto>.Mal("No se encuentra la persona a la que quieres transferir el proyecto.");
+            // Comprobaciones de existencia
+            if (proyecto is null) return Result<Proyecto>.Mal("No se encuentra el proyecto para transferir.");            
+            if (usuarioNuevo is null) return Result<Proyecto>.Mal("No se encuentra la persona a la que quieres transferir el proyecto.");
 
-            // Comprobación: si no eres el dueño, no puedes pasar la posesión del proyecto.
-            if (proyecto.PropietarioId != idPropia) return Result<Proyecto>.Mal("Solo el propietario puede transferir el proyecto.");
-
-            // Comprobación: Si el proyecto es tuyo no puedes pasartelo a ti mismo.
-            if (proyecto.PropietarioId == PropietarioNuevoId) return Result<Proyecto>.Mal("No puedes obtener un proyecto que ya te pertenece.");
-
-            // Comprobación: Si el nuevo propietario está activo.
-            if (!usuario.Activo) return Result<Proyecto>.Mal("No puedes transferir un proyecto a un miembro inactivo.");
-                    
-            // Comprobación: Si el nuevo propietario no pertenece al proyecto, no puedes pasarlo.
-            if (!proyecto.Usuarios.Any(x => x.UsuarioId == usuario.Id)) return Result<Proyecto>.Mal("No puedes transferir un proyecto a un usuario ajeno al proyecto.");
+            // Comprobaciones de proyecto.
+            if (!await _proyectoPermission.PuedesTransferirProyectoAsync(proyecto, usuarioNuevo, idPropia)) return Result<Proyecto>.Mal("No puedes transferir el proyecto a esta persona.");
 
             // Cambiamos los roles del nuevo propietario y del antiguo.
             var propietarioActual = proyecto.Usuarios
@@ -131,10 +127,9 @@ namespace TaskFlow.Infrastructure.Services
             nuevoPropietario.Rol = RolProyecto.Manager;
 
             // Cambiamos el ID en el FK.
-            proyecto.PropietarioId = PropietarioNuevoId;
-            numeroCambios += 1;             
+            proyecto.PropietarioId = PropietarioNuevoId;           
             
-            if (numeroCambios == 0) return Result<Proyecto>.Mal("No se han detectado cambios.");
+            // Base de datos
             var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
             if (!guardadoExistoso) return Result<Proyecto>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
 

@@ -4,14 +4,16 @@ namespace TaskFlow.Core.Repositories
 {
     public interface ITareaRepository
     {
-        // Obtención de Tareas
+        // GET
         Task <IEnumerable<Tarea>> ObtenerTareasPendientesPorUsuarioIdAsync(int idUsuario);
         Task <IEnumerable<Tarea>> ObtenerTareasDadasPorUsuarioIdAsync(int idUsuario);
         Task <IEnumerable<Tarea>> ObtenerTareasDeUnProyectoAsync(int idProyecto);
         Task <Tarea?> ObtenerTareaPorIdAsync(int idTarea);
 
-        // Misc.
+        // POST
         Task CrearTareaAsync(Tarea tarea);
+
+        // Misc.
         Task<bool> GuardarCambiosAsync();
     }
 }

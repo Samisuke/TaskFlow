@@ -14,7 +14,7 @@ namespace TaskFlow.Infrastructure.Repositories
             _context = context;
         }
 
-        // Peticiones GET
+        // Métodos GET
         // Todos los usuarios de un proyecto
         public async Task <IEnumerable<ProyectoUsuario>> ObtenerTodosUsuariosDeUnProyectoAsync(int idProyecto)
         {
@@ -33,12 +33,14 @@ namespace TaskFlow.Infrastructure.Repositories
             .FirstOrDefaultAsync(u => u.UsuarioId == idUsuario);
         }
 
-        // Peticiones POST
+        // Métodos POST
         public async Task CrearUsuarioAsync(ProyectoUsuario usuario)
         {
             await _context.AddAsync(usuario);
         }
 
+        // Misc.
+        // Guardar
         public async Task <bool> GuardarCambiosAsync()
         {
             return (await _context.SaveChangesAsync()) > 0;

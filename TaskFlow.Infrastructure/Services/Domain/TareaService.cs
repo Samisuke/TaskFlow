@@ -12,10 +12,12 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección de repositorios
         private readonly ITareaRepository _repoTarea;
+        private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
 
-        public TareaService(ITareaRepository repoTarea)
+        public TareaService(ITareaRepository repoTarea, IProyectoUsuarioRepository repoProyectoUsuario)
         {
             _repoTarea = repoTarea;
+            _repoProyectoUsuario = repoProyectoUsuario;
         }
 
         // Métodos GET
@@ -83,7 +85,7 @@ namespace TaskFlow.Infrastructure.Services
 
             await _repoTarea.CrearTareaAsync(tarea);
             var guardadoExistoso = await _repoTarea.GuardarCambiosAsync();
-            if (!guardadoExistoso) return Result<Tarea>.Mal("ERROR. Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
+            if (!guardadoExistoso) return Result<Tarea>.Mal("Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
 
             return Result<Tarea>.Bien(tarea);
         }
@@ -91,7 +93,8 @@ namespace TaskFlow.Infrastructure.Services
         // Métodos PATCH
         // Modificar una tarea.
         public async Task <Result<Tarea>> PatchTareaAsync(
-            int id,
+            int idPropia,
+            int idTarea,
             string? tituloTarea,
             string? descripcionTarea,
             EstadoTarea? estadoTareaTarea,
@@ -101,9 +104,13 @@ namespace TaskFlow.Infrastructure.Services
         {
             int numeroCambios = 0;
 
-            var tarea = await _repoTarea.ObtenerTareaPorIdAsync(id);
-            if (tarea is null) return Result<Tarea>.Mal("ERROR. No se ha encontrado una tarea.");
+            var tarea = await _repoTarea.ObtenerTareaPorIdAsync(idTarea);
+            if (tarea is null) return Result<Tarea>.Mal("No se encuentra la tarea que quieres modificar.");
 
+            // Comprobación: tienes que pertenecer al proyecto para poder modificar una tarea.
+            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(tarea.ProyectoId, idPropia);
+            if (proyectoUsuario is null || proyectoUsuario.Activo == false) return Result<Tarea>.Mal("No puedes modificar una tarea de un proyecto al que no perteneces.");
+        
             if (tituloTarea is not null)
             {
                 tarea.Titulo = tituloTarea;

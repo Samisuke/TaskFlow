@@ -7,6 +7,8 @@ using TaskFlow.Infrastructure.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Repositories;
 using Taskflow.Core.Repositories;
+using Taskflow.Infrastructure.Services;
+using Taskflow.Core.Services;
 
 
 
@@ -30,6 +32,11 @@ builder.Services.AddScoped<IHistorialRepository, HistorialRepository>();
 builder.Services.AddScoped<IHIstorialService, HistorialService>();
 builder.Services.AddScoped<IProyectoUsuarioRepository, ProyectoUsuarioRepository>();
 builder.Services.AddScoped<IProyectoUsuarioService, ProyectoUsuarioService>();
+builder.Services.AddScoped<ITareaEtiquetaRepository, TareaEtiquetaRepository>();
+builder.Services.AddScoped<ITareaEtiquetaService, TareaEtiquetaService>();
+// Scopes de permissions
+builder.Services.AddScoped<IProyectoPermissionService, ProyectoPermissionService>();
+builder.Services.AddScoped<IComentarioPermissionService, ComentarioPermissionService>();
 
 // Inyección del context
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>

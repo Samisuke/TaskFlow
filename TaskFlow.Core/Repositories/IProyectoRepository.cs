@@ -4,13 +4,15 @@ namespace Taskflow.Core.Repositories
 {
     public interface IProyectoRepository
     {
-        // Obtención de Proyectos
+        // GET
         Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnUsuarioAsync(int idUsuario);
         Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnCreadorAsync(int idCreador);
         Task <Proyecto?> ObtenerProyectoPorIdAsync(int idProyecto);
 
-        // Misc.
+        // POST
         Task CrearProyectoAsync(Proyecto proyecto);
+
+        // Misc.
         Task<bool> GuardarCambiosASync();
     }
 }

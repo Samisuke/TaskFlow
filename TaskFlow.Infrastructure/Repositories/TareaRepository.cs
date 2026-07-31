@@ -14,6 +14,7 @@ namespace TaskFlow.Infrastructure.Repositories
             _context = context;
         }
          
+        // Métodos GET
         // Todas las tareas pendientes con proyecto y creador de un usuario.
         public async Task <IEnumerable<Tarea>> ObtenerTareasPendientesPorUsuarioIdAsync(int idUsuario)
         {
@@ -54,12 +55,14 @@ namespace TaskFlow.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == idTarea);   
         }
 
-        // Misc.
+        // Métodos POST
         public async Task CrearTareaAsync(Tarea tarea)
         {
             await _context.AddAsync(tarea);
         }
 
+        // Misc.
+        // Guardar
         public async Task<bool> GuardarCambiosAsync()
         {
             return (await _context.SaveChangesAsync()) > 0;

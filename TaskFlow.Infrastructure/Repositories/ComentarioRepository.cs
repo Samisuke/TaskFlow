@@ -14,6 +14,8 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             _context = context;
         }
+        
+        // Métodos GET
         // Obtener comentarios de una tarea con información del usuario.
         public async Task <IEnumerable<Comentario>> ObtenerComentariosDeUnaTareaAsync(int idTarea)
         {
@@ -47,7 +49,8 @@ namespace TaskFlow.Infrastructure.Repositories
             await _context.Comentarios.AddAsync(comentario);
         }
 
-        // Métodos PATCH
+        // Misc.
+        // Guardar
         public async Task <bool> GuardarCambiosAsync()
         {
             return (await _context.SaveChangesAsync()) > 0;

@@ -61,7 +61,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         //Petición PATCH
-        // Modificar el estado y el rol de un usuario de un proyecto. Solo puede hacerse si eres Admin o Gestor del proyecto.
+        // Modificar el estado y el rol de un usuario de un proyecto. Solo puede hacerse si eres el Manager del proyecto.
         public async Task<Result<ProyectoUsuario>> PatchUsuarioAsync(
             int idPropia,
             int idUsuarioACambiar,
@@ -80,7 +80,7 @@ namespace TaskFlow.Infrastructure.Services
 
             if (activoUsuario.HasValue)
             {
-                if (comprobacion.Rol.ToString() == "Manager" || comprobacion.Rol.ToString() == "Administrador")
+                if (comprobacion.Rol.ToString() == "Manager")
                 {
                     usuario.Activo = activoUsuario.Value;
                     numeroCambios += 1;    
@@ -88,7 +88,7 @@ namespace TaskFlow.Infrastructure.Services
             }
             if (rolUsuario.HasValue)
             {
-                if (comprobacion.Rol.ToString() == "Manager" || comprobacion.Rol.ToString() == "Administrador")
+                if (comprobacion.Rol.ToString() == "Manager")
                 {
                     usuario.Rol = rolUsuario.Value;
                     numeroCambios += 1;

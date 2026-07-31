@@ -26,7 +26,8 @@ namespace TaskFlow.Core.Services
 
         // Métodos PATCH
         Task <Result<Tarea>> PatchTareaAsync(
-            int id,
+            int idPropia,
+            int idTarea,
             string? tituloTarea,
             string? descripcionTarea,
             EstadoTarea? estadoTareaTarea,

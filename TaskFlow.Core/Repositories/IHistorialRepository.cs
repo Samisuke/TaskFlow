@@ -4,11 +4,13 @@ namespace Taskflow.Core.Repositories
 {
     public interface IHistorialRepository
     {
-        // Peticiones GET
+        // GET
         Task <IEnumerable<Historial>> ObtenerHistorialDeUnaTareaAsync(int idTarea);
 
-        // Misc.
+        // POST
         Task CrearHistorialAsync(Historial historial);
+
+        // Misc.
         Task <bool> GuardarCambiosAsync();
     }
 }

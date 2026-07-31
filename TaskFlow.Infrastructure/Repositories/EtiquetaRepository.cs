@@ -14,7 +14,8 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             _context = context;
         }
-        // Obtención de Etiquetas
+
+        // Métodos GET
         // Todas las etiquetas simples
         public async Task <IEnumerable<Etiqueta>> ObtenerTodasLasEtiquetasSimplesAsync()
         {
@@ -22,28 +23,29 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        // Todas las etiquetas simples de una tarea concreta 
-        public async Task <IEnumerable<Etiqueta>> ObtenerTodasLasEtiquetasDeUnaTareaAsync(int idTarea)
-        {
-            return await _context.Etiquetas
-                .Where(e => e.Tareas
-                    .Any(e => e.TareaId == idTarea))
-                .ToListAsync();
-        }
-
-        // Una etiqueta completa por ID
+        // Una etiqueta simple por ID
         public async Task <Etiqueta?> ObtenerUnaEtiquetaPorIdAsync(int idEtiqueta)
         {
             return await _context.Etiquetas
             .FirstOrDefaultAsync(e => e.Id == idEtiqueta);   
         }
 
-        // Misc.
+        // Una etiqueta simple por nombre y color.
+        public async Task <Etiqueta?> ObtenerEtiquetaPorNombreYColorAsync(string nombre, string color)
+        {
+            return await _context.Etiquetas
+                .FirstOrDefaultAsync(e => e.Nombre == nombre
+                && e.Color == color);
+        }
+
+        // Métodos POST
         public async Task CrearEtiquetaAsync(Etiqueta etiqueta)
         {
             await _context.Etiquetas.AddAsync(etiqueta);
         }
 
+        // Misc.
+        // Guardar
         public async Task <bool> GuardarCambiosAsync()
         {
             return (await _context.SaveChangesAsync()) > 0;
