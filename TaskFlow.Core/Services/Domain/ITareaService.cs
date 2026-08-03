@@ -1,6 +1,7 @@
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Enums;
+using TaskFlow.Core.Requests;
 
 namespace TaskFlow.Core.Services
 {
@@ -21,7 +22,8 @@ namespace TaskFlow.Core.Services
             PrioridadTarea prioridadTareaTarea,
             DateTimeOffset fechaLimiteTarea,
             int proyectoId,
-            int asignadoId
+            int asignadoId,
+            IEnumerable<NuevaEtiqueta> etiquetas
         );
 
         // Métodos PATCH
@@ -30,9 +32,15 @@ namespace TaskFlow.Core.Services
             int idTarea,
             string? tituloTarea,
             string? descripcionTarea,
-            EstadoTarea? estadoTareaTarea,
             PrioridadTarea? prioridadTareaTarea,
-            DateTimeOffset? fechaLimiteTarea
+            DateTimeOffset? fechaLimiteTarea,
+            IEnumerable<NuevaEtiqueta> etiquetas
+        );
+
+        Task <Result<Tarea>> PatchEstadoTareaAsync(
+            int idPropia, 
+            int idTarea,
+            EstadoTarea estadoTareaTarea
         );
     }
 }

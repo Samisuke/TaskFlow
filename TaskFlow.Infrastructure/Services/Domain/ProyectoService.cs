@@ -26,12 +26,22 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos GET
-        // Obtener proyectos a los que pertenece una persona. Útil para ver tus propios proyectos.
+        // Obtener proyectos a los que pertenece una persona. Útil para ver los proyectos de un amigo.
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int idUsuario)
         {
             // Sacar los proyectos del usuario
             var proyectos = await _repoProyecto.ObtenerProyectosDeUnUsuarioAsync(idUsuario);
-            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("ERROR. Este usuario no pertenece a ningún proyecto aun.");
+            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("Este usuario no pertenece a ningún proyecto aun.");
+
+            return Result<IEnumerable<Proyecto>>.Bien(proyectos);
+        }
+        
+        // Obtener proyectos que te pertenecen. Útil para ver una lista de tus propios proyectos.
+        public async Task<Result<IEnumerable<Proyecto>>> GetProyectosPropiosAsync(int idPropia)
+        {
+            // Sacar los proyectos del usuario
+            var proyectos = await _repoProyecto.ObtenerProyectosDeUnUsuarioAsync(idPropia);
+            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("No tienes comentarios aun.");
 
             return Result<IEnumerable<Proyecto>>.Bien(proyectos);
         }

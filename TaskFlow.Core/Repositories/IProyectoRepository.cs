@@ -6,6 +6,7 @@ namespace Taskflow.Core.Repositories
     {
         // GET
         Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnUsuarioAsync(int idUsuario);
+        Task <IEnumerable<Proyecto>> ObtenerProyectosPropiosAsync(int idUsuario);
         Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnCreadorAsync(int idCreador);
         Task <Proyecto?> ObtenerProyectoPorIdAsync(int idProyecto);
 

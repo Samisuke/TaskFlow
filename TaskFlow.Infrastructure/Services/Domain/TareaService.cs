@@ -5,6 +5,8 @@ using TaskFlow.Core.Enums;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
+using TaskFlow.Core.Requests;
+using System.Collections;
 
 
 namespace TaskFlow.Infrastructure.Services
@@ -13,15 +15,15 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección de repositorios
         private readonly ITareaRepository _repoTarea;
-        private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
+        private readonly ITareaEtiquetaService _TareaEtiquetaService;
         private readonly ITareaPermissionService _tareaPermissions;
 
         public TareaService(ITareaRepository repoTarea,
-        IProyectoUsuarioRepository repoProyectoUsuario,
+        ITareaEtiquetaService TareaEtiquetaService,
         ITareaPermissionService tareaPermissions)
         {
             _repoTarea = repoTarea;
-            _repoProyectoUsuario = repoProyectoUsuario;
+            _TareaEtiquetaService = TareaEtiquetaService;
             _tareaPermissions = tareaPermissions;
         }
 
@@ -72,7 +74,8 @@ namespace TaskFlow.Infrastructure.Services
             PrioridadTarea prioridadTareaTarea,
             DateTimeOffset fechaLimiteTarea,
             int proyectoId,
-            int asignadoId
+            int asignadoId,
+            IEnumerable<NuevaEtiqueta> etiquetas
         )
         {
             // Comprobaciones.
@@ -91,11 +94,18 @@ namespace TaskFlow.Infrastructure.Services
                 AsignadoId = asignadoId,
                 CreadorId = idPropia
             };
-            
+
             // Base de datos.
             await _repoTarea.CrearTareaAsync(tarea);
             var guardadoExistoso = await _repoTarea.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<Tarea>.Mal("Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
+
+            // Asignamos posibles etiquetas.
+            if (etiquetas.Any())
+            {
+                var resultadoEtiqueta = await _TareaEtiquetaService.PostTareaEtiquetaAsync(tarea, etiquetas);
+                if (!resultadoEtiqueta.EsCorrecto) return Result<Tarea>.Mal(resultadoEtiqueta.Error);
+            }
 
             return Result<Tarea>.Bien(tarea);
         }
@@ -103,11 +113,13 @@ namespace TaskFlow.Infrastructure.Services
         // Métodos PATCH
         // Modificar una tarea (Sin contar su estado).
         public async Task <Result<Tarea>> PatchTareaAsync(
+            int idPropia,
             int idTarea,
             string? tituloTarea,
             string? descripcionTarea,
             PrioridadTarea? prioridadTareaTarea,
-            DateTimeOffset? fechaLimiteTarea
+            DateTimeOffset? fechaLimiteTarea,
+            IEnumerable<NuevaEtiqueta> etiquetas
         )
         {
             int numeroCambios = 0;
@@ -116,7 +128,7 @@ namespace TaskFlow.Infrastructure.Services
             if (tarea is null) return Result<Tarea>.Mal("No se encuentra la tarea que quieres modificar.");
 
             // Comprobaciones.
-            if (!await _tareaPermissions.PuedeModificarTareasAsync(idTarea, tarea)) Result<Tarea>.Mal("No puedes modificar la tarea.");
+            if (!await _tareaPermissions.PuedeModificarTareasAsync(idPropia, tarea)) return Result<Tarea>.Mal("No puedes modificar la tarea.");
 
             // Realizar cambios.
             if (tituloTarea is not null)
@@ -140,11 +152,18 @@ namespace TaskFlow.Infrastructure.Services
                 numeroCambios += 1; 
             }
 
+            // Asignamos posibles etiquetas.
+            if (etiquetas.Any())
+            {
+                var resultadoEtiqueta = await _TareaEtiquetaService.PostTareaEtiquetaAsync(tarea, etiquetas);
+                if (!resultadoEtiqueta.EsCorrecto) return Result<Tarea>.Mal(resultadoEtiqueta.Error);
+            }
+            
             // Base de datos.
             if (numeroCambios == 0) return Result<Tarea>.Mal("No se han detectado cambios.");
             var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-            
+
             return Result<Tarea>.Bien(tarea);
         }
 

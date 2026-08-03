@@ -19,4 +19,19 @@ namespace TaskFlow.Core.Common
         public static Result<T> Mal(string mensajeError) 
             => new Result<T>(false, mensajeError, default);
     }
+
+    public class Result
+    {
+        public bool EsCorrecto { get; init; }
+        public string Error { get; init; } = string.Empty;
+
+        public static Result Bien() => new() { EsCorrecto = true };
+
+        public static Result Mal(string error) =>
+            new()
+            {
+                EsCorrecto = false,
+                Error = error
+            };
+    }
 }

@@ -26,11 +26,20 @@ namespace TaskFlow.Infrastructure.Services
             _comentarioPermission = comentarioPermission;
         }
         // Métodos GET
-        // Obtener los comentarios que ha hecho un usuario. Útil para ver una lsita de tus propios comentarios en las diferentes tareas.
+        // Obtener los comentarios que ha hecho un usuario. Útil para ver una lsita de comentarios que un usario ha hecho en tu proyecto.
         public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnUsuarioAsync(int idUsuario)
         {
             var comentarios = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(idUsuario);
-            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("EEl usuario no tiene comentarios.");
+            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("El usuario no tiene comentarios.");
+
+            return Result<IEnumerable<Comentario>>.Bien(comentarios);
+        }
+
+        // Obtener los comentarios que has hecho tú mismo. Útil para ver una lista de tus propios comentarios en las diferentes tareas.
+        public async Task <Result<IEnumerable<Comentario>>> GetComentariosPropiosAsync(int idPropia)
+        {
+            var comentarios = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(idPropia);
+            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("No tienes comentarios todavía.");
 
             return Result<IEnumerable<Comentario>>.Bien(comentarios);
         }

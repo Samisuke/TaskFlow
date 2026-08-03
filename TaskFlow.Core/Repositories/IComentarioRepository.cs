@@ -6,6 +6,7 @@ namespace TaskFlow.Core.Repositories
     {
         // GET
         Task <IEnumerable<Comentario>> ObtenerComentariosDeUnaTareaAsync(int idTarea);
+        Task <IEnumerable<Comentario>> GetComentariosPropiosAsync(int idPropia);
         Task <IEnumerable<Comentario>> ObtenerComentariosDeUnUsuarioAsync(int idUsuario);
         Task <Comentario?> ObtenerComentarioPorIdAsync(int id);
 
