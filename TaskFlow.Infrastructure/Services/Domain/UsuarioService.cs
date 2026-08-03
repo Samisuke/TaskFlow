@@ -2,7 +2,6 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Models;
-using Taskflow.Core.Repositories;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -53,7 +52,8 @@ namespace TaskFlow.Infrastructure.Services
             string passUsuario,
             bool activoUsuario
         )
-        {
+        {   
+            // Crear usuario.
             var usuario = new Usuario
             {
                 Nombre = nombreUsuario,
@@ -64,6 +64,7 @@ namespace TaskFlow.Infrastructure.Services
                 Activo = activoUsuario
             };
 
+            // Base de datos.
             await _repoUsuario.CrearUnUsuarioNuevoAsync(usuario);
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
@@ -83,8 +84,9 @@ namespace TaskFlow.Infrastructure.Services
         {
             int numeroCambios = 0;
             var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
-            if (usuario is null) return Result<Usuario>.Mal("ERROR. No se encuentra el usuario.");
+            if (usuario is null) return Result<Usuario>.Mal("No se encuentra el usuario.");
 
+            // Realizar cambios
             if (nombreUsuario is not null)
             {
                 usuario.Nombre = nombreUsuario;
@@ -108,6 +110,7 @@ namespace TaskFlow.Infrastructure.Services
                 numeroCambios += 1;
             } 
 
+            // Base de datos
             if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios.");
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
@@ -121,6 +124,7 @@ namespace TaskFlow.Infrastructure.Services
             var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
             if (usuario is null) return Result<Usuario>.Mal("ERROR. Usuario no encontrado.");
             
+            // Cambios.
             if (passNueva is not null)
             {
                 //Convertir contraseña a segura.
@@ -128,6 +132,7 @@ namespace TaskFlow.Infrastructure.Services
                 numeroCambios += 1;
             } 
 
+            // Base de datos.
             if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios");
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");

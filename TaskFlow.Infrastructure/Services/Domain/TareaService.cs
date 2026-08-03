@@ -1,4 +1,5 @@
 using Taskflow.Core.Repositories;
+using Taskflow.Core.Services;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Enums;
 using TaskFlow.Core.Models;
@@ -13,11 +14,15 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección de repositorios
         private readonly ITareaRepository _repoTarea;
         private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
+        private readonly ITareaPermissionService _tareaPermissions;
 
-        public TareaService(ITareaRepository repoTarea, IProyectoUsuarioRepository repoProyectoUsuario)
+        public TareaService(ITareaRepository repoTarea,
+        IProyectoUsuarioRepository repoProyectoUsuario,
+        ITareaPermissionService tareaPermissions)
         {
             _repoTarea = repoTarea;
             _repoProyectoUsuario = repoProyectoUsuario;
+            _tareaPermissions = tareaPermissions;
         }
 
         // Métodos GET
@@ -25,7 +30,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task <Result<IEnumerable<Tarea>>> GetTareasPendientesDeUsuarioAsync(int idUsuario)
         {
             var tareas = await _repoTarea.ObtenerTareasPendientesPorUsuarioIdAsync(idUsuario);
-            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("ERROR. No se encuentran tareas pendientes.");
+            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("No se encuentran tareas pendientes.");
 
             return Result <IEnumerable<Tarea>>.Bien(tareas);
         }
@@ -34,7 +39,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task<Result<IEnumerable<Tarea>>> GetTareasDadasDeUsuarioAsync(int idUsuario)
         {
             var tareas = await _repoTarea.ObtenerTareasDadasPorUsuarioIdAsync(idUsuario);
-            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("ERROR. No se encuentran tareas dadas por este usuario.");
+            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("No se encuentran tareas dadas por este usuario.");
 
             return Result<IEnumerable<Tarea>>.Bien(tareas);
         }
@@ -43,7 +48,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task<Result<IEnumerable<Tarea>>> GetTareasDeUnProyectoAsync(int idProyecto)
         {
             var tareas = await _repoTarea.ObtenerTareasDeUnProyectoAsync(idProyecto);
-            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("ERROR. No se encuentran tareas dadas por este usuario.");
+            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("No se encuentran tareas dadas por este usuario.");
 
             return Result<IEnumerable<Tarea>>.Bien(tareas);
         }
@@ -52,7 +57,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task <Result<Tarea?>> GetTareaPorIdAsync(int id)
         {
             var tarea = await _repoTarea.ObtenerTareaPorIdAsync(id);
-            if (tarea is null) return Result<Tarea?>.Mal("ERROR. No se ha encontrado una tarea.");
+            if (tarea is null) return Result<Tarea?>.Mal("No se ha encontrado una tarea.");
 
             return Result<Tarea?>.Bien(tarea);
         }
@@ -70,6 +75,10 @@ namespace TaskFlow.Infrastructure.Services
             int asignadoId
         )
         {
+            // Comprobaciones.
+            if (!await _tareaPermissions.PuedePublicarTareasAsync(proyectoId, idPropia)) return Result<Tarea>.Mal("No se ha encontrado una tarea.");
+
+            // Creacion de tarea.
             var tarea = new Tarea
             {
                 Titulo = tituloTarea,
@@ -82,7 +91,8 @@ namespace TaskFlow.Infrastructure.Services
                 AsignadoId = asignadoId,
                 CreadorId = idPropia
             };
-
+            
+            // Base de datos.
             await _repoTarea.CrearTareaAsync(tarea);
             var guardadoExistoso = await _repoTarea.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<Tarea>.Mal("Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
@@ -91,13 +101,11 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos PATCH
-        // Modificar una tarea.
+        // Modificar una tarea (Sin contar su estado).
         public async Task <Result<Tarea>> PatchTareaAsync(
-            int idPropia,
             int idTarea,
             string? tituloTarea,
             string? descripcionTarea,
-            EstadoTarea? estadoTareaTarea,
             PrioridadTarea? prioridadTareaTarea,
             DateTimeOffset? fechaLimiteTarea
         )
@@ -107,10 +115,10 @@ namespace TaskFlow.Infrastructure.Services
             var tarea = await _repoTarea.ObtenerTareaPorIdAsync(idTarea);
             if (tarea is null) return Result<Tarea>.Mal("No se encuentra la tarea que quieres modificar.");
 
-            // Comprobación: tienes que pertenecer al proyecto para poder modificar una tarea.
-            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(tarea.ProyectoId, idPropia);
-            if (proyectoUsuario is null || proyectoUsuario.Activo == false) return Result<Tarea>.Mal("No puedes modificar una tarea de un proyecto al que no perteneces.");
-        
+            // Comprobaciones.
+            if (!await _tareaPermissions.PuedeModificarTareasAsync(idTarea, tarea)) Result<Tarea>.Mal("No puedes modificar la tarea.");
+
+            // Realizar cambios.
             if (tituloTarea is not null)
             {
                 tarea.Titulo = tituloTarea;
@@ -120,11 +128,6 @@ namespace TaskFlow.Infrastructure.Services
             {
                 tarea.Descripcion = descripcionTarea;
                 numeroCambios += 1;
-            }
-            if (estadoTareaTarea.HasValue)
-            {
-                tarea.Estado = estadoTareaTarea.Value;
-                numeroCambios += 1; 
             }
             if (prioridadTareaTarea.HasValue)
             {
@@ -136,11 +139,37 @@ namespace TaskFlow.Infrastructure.Services
                 tarea.FechaLimite = fechaLimiteTarea.Value;
                 numeroCambios += 1; 
             }
-            if (numeroCambios == 0) return Result<Tarea>.Mal("ERROR. No se han detectado cambios.");
+
+            // Base de datos.
+            if (numeroCambios == 0) return Result<Tarea>.Mal("No se han detectado cambios.");
             var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Tarea>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+            if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
             
             return Result<Tarea>.Bien(tarea);
+        }
+
+        // Modificar el estado de una tarea. Separado del PATCH normal por modelo de negocio.
+        public async Task <Result<Tarea>> PatchEstadoTareaAsync(
+            int idPropia, 
+            int idTarea,
+            EstadoTarea estadoTareaTarea
+        )
+        {
+            var tarea = await _repoTarea.ObtenerTareaPorIdAsync(idTarea);
+            if (tarea is null) return Result<Tarea>.Mal("No se encuentra la tarea que quieres modificar.");
+
+            // Comrpobaciones.
+            if (!await _tareaPermissions.PuedeModificarEstadoTareaAsync(idPropia, tarea)) return Result<Tarea>.Mal("No puedes modificar el estado de una tarea.");
+
+            // Realizamos cambios
+            tarea.Estado = estadoTareaTarea;
+
+            // Base de datos
+            var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
+            if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+            
+            return Result<Tarea>.Bien(tarea);
+
         }
     }
 }

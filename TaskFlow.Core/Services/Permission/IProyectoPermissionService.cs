@@ -6,6 +6,15 @@ namespace Taskflow.Core.Services
     {
         // Comprueba que pertenezcas al proyecto y estés activo para poder comentar en el.
         Task<bool> EsMiembroActivoAsync(int idProyecto, int idPropia);
+
+        // Contiene las comprobaciones para poder modificar un proyecto.
+        Task<bool>PuedeModificarProyectoAsync(int idProyecto, int idPropia);
+
+        // Contiene las comprobaciones para poder transferir un proyecto.
         Task<bool> PuedesTransferirProyectoAsync(Proyecto proyecto, Usuario usuarioNuevo, int idPropia);
+
+        // Contiene las comprobaciones para poder añadir un usuario a un proyecto
+        Task<bool> PuedeAñadirPersonasAsync(int proyectoId, int nuevoUsuarioId, int idPropia);
     }
+
 }

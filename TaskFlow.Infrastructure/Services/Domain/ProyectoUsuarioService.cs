@@ -3,6 +3,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Enums;
 using Taskflow.Core.Repositories;
+using Taskflow.Core.Services;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -10,10 +11,12 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección del repositorio
         private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
+        private readonly IProyectoPermissionService _proyectoPermission;
 
-        public ProyectoUsuarioService(IProyectoUsuarioRepository repoProyectoUsuario)
+        public ProyectoUsuarioService(IProyectoUsuarioRepository repoProyectoUsuario, IProyectoPermissionService proyectoPermission)
         {
             _repoProyectoUsuario = repoProyectoUsuario;
+            _proyectoPermission = proyectoPermission;
         }
 
         // Peticiones GET
@@ -38,12 +41,17 @@ namespace TaskFlow.Infrastructure.Services
         //Petición POST
         // Añadir un usuario a un proyecto.
         public async Task<Result<ProyectoUsuario>> PostUsuarioAsync(
+            int idPropia,
             int usuarioId,
             int proyectoId,
             // El usuario estará activo por defecto cuando lo añadas a un proyecto.
             RolProyecto rolUsuario
         )
         {
+            // Comprobaciones.
+            if (!await _proyectoPermission.PuedeAñadirPersonasAsync(proyectoId, usuarioId, idPropia)) return Result<ProyectoUsuario>.Mal("No puedes añadir este usuario al proyecto.");
+            
+            // Creación de usuario nuevo.
             var usuario = new ProyectoUsuario
             {
                 UsuarioId = usuarioId,
@@ -53,9 +61,10 @@ namespace TaskFlow.Infrastructure.Services
                 Activo = true
             };
 
+            // Base de datos.
             await _repoProyectoUsuario.CrearUsuarioAsync(usuario);
             var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
-            if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("ERROR. Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
+            if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
 
             return Result<ProyectoUsuario>.Bien(usuario);
         }
@@ -75,28 +84,25 @@ namespace TaskFlow.Infrastructure.Services
             var usuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idUsuarioACambiar);
             if (usuario is null) return Result<ProyectoUsuario>.Mal("No se encuentra el usuario.");
 
-            var comprobacion = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idPropia);
-            if (comprobacion is null) return Result<ProyectoUsuario>.Mal("Ha ocurrido un error inesperado, intentalo de nuevo mas tarde.");
+            // Comprobaciones
+            if (!await _proyectoPermission.PuedeModificarProyectoAsync(idProyecto, idPropia))
 
+            // Realización de cambios.
             if (activoUsuario.HasValue)
             {
-                if (comprobacion.Rol.ToString() == "Manager")
-                {
-                    usuario.Activo = activoUsuario.Value;
-                    numeroCambios += 1;    
-                }
+                usuario.Activo = activoUsuario.Value;
+                numeroCambios += 1;    
             }
             if (rolUsuario.HasValue)
             {
-                if (comprobacion.Rol.ToString() == "Manager")
-                {
-                    usuario.Rol = rolUsuario.Value;
-                    numeroCambios += 1;
-                }    
+                usuario.Rol = rolUsuario.Value;
+                numeroCambios += 1;   
             }
 
+            // Base de datos.
+            if (numeroCambios == 0) return Result<ProyectoUsuario>.Mal("No se han detectado cambios para realizar.");
             var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
-            if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("ERROR. Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
+            if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
 
             return Result<ProyectoUsuario>.Bien(usuario);
         }

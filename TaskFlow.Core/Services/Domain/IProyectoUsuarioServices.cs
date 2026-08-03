@@ -12,6 +12,7 @@ namespace TaskFlow.Core.Services
 
         // Métodos POST
         Task<Result<ProyectoUsuario>> PostUsuarioAsync(
+            int idPropia,
             int usuarioId,
             int proyectoId,
             // El usuario estará activo por defecto cuando lo añadas a un proyecto.

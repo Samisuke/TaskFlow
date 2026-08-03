@@ -18,6 +18,7 @@ namespace TaskFlow.Core.Services
 
         // Métodos PATCH
         Task<Result<Proyecto>> PatchProyectoAsync(
+        int idPropia,
         int idProyecto,
         string? nombreProyecto,
         string? descripcionProyecto

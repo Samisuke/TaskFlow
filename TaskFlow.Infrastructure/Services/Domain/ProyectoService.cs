@@ -72,6 +72,7 @@ namespace TaskFlow.Infrastructure.Services
         // Métodos PATCH
         // Modificaciones del proyecto generales.
         public async Task<Result<Proyecto>> PatchProyectoAsync(
+        int idPropia,
         int idProyecto,
         string? nombreProyecto,
         string? descripcionProyecto
@@ -81,6 +82,9 @@ namespace TaskFlow.Infrastructure.Services
 
             var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(idProyecto);
             if (proyecto is null) return Result<Proyecto>.Mal("No se encuentra el proyecto.");
+
+            // Comprobaciones
+            if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyecto.Id, idPropia)) return Result<Proyecto>.Mal("no puedes modificar el proyecto.");
             
             if (nombreProyecto is not null)
             {

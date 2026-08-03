@@ -9,10 +9,15 @@ namespace Taskflow.Infrastructure.Services
     {
         // Inyección del repositorio
         private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
+        private readonly IUsuarioRepository _repoUsuario;
 
-        public ProyectoPermissionService(IProyectoUsuarioRepository repoProyectoUsuario)
+        public ProyectoPermissionService(
+            IProyectoUsuarioRepository repoProyectoUsuario,
+            IUsuarioRepository repoUsuario
+        )
         {
             _repoProyectoUsuario = repoProyectoUsuario;
+            _repoUsuario = repoUsuario;
         }
 
         // Comprueba que pertenezcas al proyecto y estés activo.
@@ -22,7 +27,17 @@ namespace Taskflow.Infrastructure.Services
             return proyectoUsuario is not null && proyectoUsuario.Activo;
         }
 
-        // Contiene las comprobaciones para poder transferir un proyecto
+        // Contiene las comprobaciones para poder modificar un proyecto.
+        public async Task<bool>PuedeModificarProyectoAsync(int idProyecto, int idPropia)
+        {
+            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idPropia);
+            
+            return proyectoUsuario is not null 
+            && proyectoUsuario.Activo
+            && proyectoUsuario.Rol == TaskFlow.Core.Enums.RolProyecto.Manager;
+        }
+
+        // Contiene las comprobaciones para poder transferir un proyecto.
         public async Task<bool> PuedesTransferirProyectoAsync(Proyecto proyecto, Usuario usuarioNuevo, int idPropia)
         {
             // Comprobación: si no eres el dueño, no puedes pasar la posesión del proyecto.
@@ -36,6 +51,27 @@ namespace Taskflow.Infrastructure.Services
 
             // Comprobación: Si el miembro no está activo en la aplicación, no peudes pasarlo.
             if (!usuarioNuevo.Activo) return false;
+
+            return true;
+        }
+
+        // Contiene las comprobaciones para poder añadir un usuario a un proyecto
+        public async  Task<bool> PuedeAñadirPersonasAsync(int proyectoId, int nuevoUsuarioId, int idPropia)
+        {
+            var usuarioPropio = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(proyectoId, idPropia);
+            if (usuarioPropio is null) return false;
+
+            var nuevoUsuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(nuevoUsuarioId);
+            if (nuevoUsuario is null) return false;
+
+            // Comprobación de rol.
+            if (usuarioPropio.Rol != TaskFlow.Core.Enums.RolProyecto.Manager && usuarioPropio.Rol != TaskFlow.Core.Enums.RolProyecto.Administrador) return false;
+
+            // Comprobación de inactividad.
+            if (!nuevoUsuario.Activo) return false;
+
+            // Comprobación de pertenencia
+            if (await EsMiembroActivoAsync(proyectoId, idPropia)) return false;
 
             return true;
         }
