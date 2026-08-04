@@ -32,12 +32,10 @@ namespace Taskflow.Infrastructure.Services
             return Result<IEnumerable<TareaEtiqueta>>.Bien(etiquetas);
         }
 
-        // Método POST
-        // Vincular una etiqueta a una tarea.
-        public async Task<Result> PostTareaEtiquetaAsync(
-            Tarea tarea,
-            IEnumerable<NuevaEtiqueta> etiquetas
-        )
+        // Misc.
+        // Comprobamos si una etiqueta ya existe con un nombre y color que recibimos de la tarea. Si existe, devolvemos esa etiqueta.
+        // Si no existe, la creamos.
+        public async Task<Result> ComprobarSiEtiquetaExisteOCrearASync(IEnumerable<NuevaEtiqueta> etiquetas)
         {
             // Comprobamos cada elemento de la lista
             foreach (var NuevaEtiqueta in etiquetas)
@@ -53,27 +51,49 @@ namespace Taskflow.Infrastructure.Services
                         Nombre = NuevaEtiqueta.Nombre,
                         Color = NuevaEtiqueta.Color
                     };
-                    
-                    // La guardamos.
+
+                    // La metemos en la base de datos.
                     await _repoEtiqueta.CrearEtiquetaAsync(etiqueta);
-                    var guardadoExitosoEtiqueta = await _repoEtiqueta.GuardarCambiosAsync();
-                    if (!guardadoExitosoEtiqueta) return Result.Mal("Fallo inesperado al guardar la etiqueta. Inténtalo de nuevo más tarde.");
                 }
 
+
+            }
+
+            // Guardamos los cambios
+            var guardadoExitosoEtiqueta = await _repoEtiqueta.GuardarCambiosAsync();
+            if (!guardadoExitosoEtiqueta) return Result.Mal("Fallo inesperado al guardar la etiqueta. Inténtalo de nuevo más tarde.");
+
+            return Result.Bien();   
+        }
+
+        // Asignar etiquetas a una tarea concreta
+        public async Task<Result> AsignarEtiquetaATareaASync(
+            Tarea tarea,
+            IEnumerable<NuevaEtiqueta> etiquetas
+        )
+        {
+            foreach (var etiqueta in etiquetas)
+            {
+                var etiquetaNueva = await _repoEtiqueta.ObtenerEtiquetaPorNombreYColorAsync(etiqueta.Nombre, etiqueta.Color);
+                if (etiquetaNueva is null) return Result.Mal("Error interno.");
+
                 // Comprobación: Que la tarea no tenga ya esta misma etiqueta.
-                bool relacionExiste = await _repoTareaEtiqueta.ExisteRelacionAsync(tarea.Id, etiqueta.Id);
+                bool relacionExiste = await _repoTareaEtiqueta.ExisteRelacionAsync(tarea.Id, etiquetaNueva.Id);
                 if (relacionExiste) continue;
-                
+
                 // Creamos la relación
                 await _repoTareaEtiqueta.CrearTareaEtiquetaAsync(new TareaEtiqueta
                 {
                     TareaId = tarea.Id,
-                    EtiquetaId = etiqueta.Id
-                });
+                    EtiquetaId = etiquetaNueva.Id
+                });          
             }
 
-            await _repoTareaEtiqueta.GuardarCambiosAsync();
-            return Result.Bien();
+            var guardadoExitoso = await _repoTareaEtiqueta.GuardarCambiosAsync();
+            if (!guardadoExitoso) return Result.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+            return Result.Bien();       
         }
+
+        
     }
 }

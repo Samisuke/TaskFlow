@@ -100,11 +100,14 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExistoso = await _repoTarea.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<Tarea>.Mal("Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
 
-            // Asignamos posibles etiquetas.
+            // Procesamos las etiquetas
             if (etiquetas.Any())
             {
-                var resultadoEtiqueta = await _TareaEtiquetaService.PostTareaEtiquetaAsync(tarea, etiquetas);
-                if (!resultadoEtiqueta.EsCorrecto) return Result<Tarea>.Mal(resultadoEtiqueta.Error);
+                var comprobarEtiquetas = await _TareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
+                if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
+
+                var asignarEtiquetas =  await _TareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
+                if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
             }
 
             return Result<Tarea>.Bien(tarea);
@@ -152,11 +155,16 @@ namespace TaskFlow.Infrastructure.Services
                 numeroCambios += 1; 
             }
 
-            // Asignamos posibles etiquetas.
+            // Procesamos las etiquetas
             if (etiquetas.Any())
             {
-                var resultadoEtiqueta = await _TareaEtiquetaService.PostTareaEtiquetaAsync(tarea, etiquetas);
-                if (!resultadoEtiqueta.EsCorrecto) return Result<Tarea>.Mal(resultadoEtiqueta.Error);
+                var comprobarEtiquetas = await _TareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
+                if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
+
+                var asignarEtiquetas =  await _TareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
+                if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+
+                numeroCambios += 1;
             }
             
             // Base de datos.
