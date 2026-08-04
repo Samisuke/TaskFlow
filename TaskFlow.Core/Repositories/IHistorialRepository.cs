@@ -1,6 +1,6 @@
 using TaskFlow.Core.Models;
 
-namespace Taskflow.Core.Repositories
+namespace TaskFlow.Core.Repositories
 {
     public interface IHistorialRepository
     {

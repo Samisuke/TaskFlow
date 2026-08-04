@@ -16,17 +16,16 @@ public class HistorialConfiguration : IEntityTypeConfiguration<Historial>
         builder.Property(x => x.Fecha)
             .IsRequired();
 
-        builder.Property(x => x.TareaId)
+        builder.Property(x => x.ProyectoId)
             .IsRequired();
-        builder.HasOne(x => x.Tarea)
+        builder.HasOne(x => x.Proyecto)
             .WithMany(x => x.Historiales)
-            .HasForeignKey(x => x.UsuarioId);
-
+            .HasForeignKey(x => x.ProyectoId);
 
         builder.Property(x => x.UsuarioId)
             .IsRequired();
         builder.HasOne(x => x.Usuario)
             .WithMany()
-            .HasForeignKey(x => x.TareaId);
+            .HasForeignKey(x => x.UsuarioId);
     }
 }

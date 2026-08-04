@@ -1,8 +1,8 @@
-using Taskflow.Core.Repositories;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 
-namespace Taskflow.Core.Services
+
+namespace TaskFlow.Core.Services
 {
     public class TareaPermissionService : ITareaPermissionService
     {

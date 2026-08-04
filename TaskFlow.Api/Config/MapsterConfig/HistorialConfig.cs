@@ -14,15 +14,15 @@ namespace TaskFlow.Api.Config.MapsterConfig
                 src => src.Usuario != null
                 ? src.Usuario.Nombre : string.Empty);
 
-            TypeAdapterConfig<Comentario, HistorialReadDtoTarea>
+            TypeAdapterConfig<Proyecto, HistorialReadDtoProyecto>
                 .NewConfig()
                 .Map(dest => dest.Nombre,
-                src => src.Tarea != null!
-                ? src.Tarea.Titulo : string.Empty)
+                src => src.Nombre != null!
+                ? src.Nombre : string.Empty)
                 
                 .Map(dest => dest.Descripcion,
-                src => src.Tarea != null!
-                ? src.Tarea.Descripcion : string.Empty);       
+                src => src.Descripcion != null!
+                ? src.Descripcion : string.Empty);       
         }   
     }
 }

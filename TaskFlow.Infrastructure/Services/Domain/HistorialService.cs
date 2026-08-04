@@ -1,7 +1,7 @@
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
-using Taskflow.Core.Repositories;
+using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Requests;
 
 namespace TaskFlow.Infrastructure.Services

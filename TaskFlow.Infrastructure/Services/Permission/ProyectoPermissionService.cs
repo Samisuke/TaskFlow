@@ -1,9 +1,8 @@
-using Taskflow.Core.Repositories;
-using Taskflow.Core.Services;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Models;
+using TaskFlow.Core.Services;
 
-namespace Taskflow.Infrastructure.Services
+namespace TaskFlow.Infrastructure.Services
 {
     public class ProyectoPermissionService : IProyectoPermissionService
     {

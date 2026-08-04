@@ -1,11 +1,10 @@
-using Taskflow.Core.Repositories;
+using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
-using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Requests;
 
-namespace Taskflow.Infrastructure.Services
+namespace TaskFlow.Infrastructure.Services
 {
     public class TareaEtiquetaService : ITareaEtiquetaService
     {

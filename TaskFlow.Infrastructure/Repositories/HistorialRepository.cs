@@ -1,7 +1,7 @@
 using TaskFlow.Infrastructure.Data;
 using TaskFlow.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using Taskflow.Core.Repositories;
+using TaskFlow.Core.Repositories;
 
 namespace TaskFlow.Infrastructure.Repositories
 {

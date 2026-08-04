@@ -46,8 +46,5 @@ public class TareaConfiguration : IEntityTypeConfiguration<Tarea>
         builder.HasMany(x => x.Comentarios)
             .WithOne(x => x.Tarea)
             .HasForeignKey(x => x.TareaId);
-        builder.HasMany(x => x.Historiales)
-            .WithOne(x => x.Tarea)
-            .HasForeignKey(x => x.TareaId);
     }
 }

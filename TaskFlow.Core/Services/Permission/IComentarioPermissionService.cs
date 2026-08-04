@@ -1,6 +1,6 @@
 using TaskFlow.Core.Models;
 
-namespace Taskflow.Core.Services
+namespace TaskFlow.Core.Services
 {
     public interface IComentarioPermissionService
     {
