@@ -28,6 +28,14 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Métodos GET
+        // Obtener un proyecto por ID
+        public async Task<Result<Proyecto>> GetProyectoPorIdAsync(int id)
+        {
+            var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(id);
+            if (proyecto is null) return Result<Proyecto>.Mal("No existe el proyecto,");
+
+            return Result<Proyecto>.Bien(proyecto);
+        }
         // Obtener proyectos a los que pertenece una persona. Útil para ver los proyectos de un amigo.
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int idUsuario)
         {
@@ -37,23 +45,13 @@ namespace TaskFlow.Infrastructure.Services
 
             return Result<IEnumerable<Proyecto>>.Bien(proyectos);
         }
-        
-        // Obtener proyectos que te pertenecen. Útil para ver una lista de tus propios proyectos.
-        public async Task<Result<IEnumerable<Proyecto>>> GetProyectosPropiosAsync(int idPropia)
-        {
-            // Sacar los proyectos del usuario
-            var proyectos = await _repoProyecto.ObtenerProyectosDeUnUsuarioAsync(idPropia);
-            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("No tienes comentarios aun.");
-
-            return Result<IEnumerable<Proyecto>>.Bien(proyectos);
-        }
 
         // Obtener los proyectos creados por una persona concreta. Útil para saber los proyectos de los que eres dueño.
         public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int idCreador)
         {
             // Sacar los proyectos del usuario
             var proyectos = await _repoProyecto.ObtenerProyectosDeUnCreadorAsync(idCreador);
-            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("ERROR. Este usuario no tiene proyectos creados.");
+            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("Este usuario no tiene proyectos creados.");
 
             return Result<IEnumerable<Proyecto>>.Bien(proyectos);      
         }
