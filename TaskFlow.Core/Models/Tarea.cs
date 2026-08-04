@@ -23,7 +23,6 @@ namespace TaskFlow.Core.Models
         public Usuario? Creador {get; set;}
 
         public ICollection<Comentario> Comentarios {get; set;}  = [];
-        public ICollection<Historial> Historiales {get; set;} = [];
         public ICollection<TareaEtiqueta> Etiquetas {get; set;} = [];
     }
 }

@@ -15,5 +15,6 @@ namespace TaskFlow.Core.Models
 
         public ICollection<Tarea> Tareas { get; set; } = [];
         public ICollection<ProyectoUsuario> Usuarios {get; set;} = [];
+        public ICollection<Historial> Historiales {get; set;} = [];
     }
 }

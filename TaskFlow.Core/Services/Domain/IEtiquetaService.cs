@@ -8,11 +8,5 @@ namespace TaskFlow.Core.Services
     {
         // Métodos GET
         Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int idEtiqueta);
-
-        //Métodos POST
-        Task<Result<Etiqueta>> PostEtiquetaAsync(
-            string nombreEtiqueta,
-            string colorEtiqueta
-        );
     }
 }

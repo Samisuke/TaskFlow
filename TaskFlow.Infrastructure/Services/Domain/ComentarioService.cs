@@ -13,17 +13,21 @@ namespace TaskFlow.Infrastructure.Services
         private readonly ITareaRepository _repoTarea;
         private readonly IProyectoPermissionService _proyectoPermission;
         private readonly IComentarioPermissionService _comentarioPermission;
+        private readonly IHIstorialService _historialService;
+
         public ComentarioService(
             IComentarioRepository repoComentario,
             ITareaRepository repoTarea,
             IProyectoPermissionService proyectoPermission,
-            IComentarioPermissionService comentarioPermission
+            IComentarioPermissionService comentarioPermission,
+            IHIstorialService historialService
         )
         {
             _repoComentario = repoComentario;
             _repoTarea = repoTarea;
             _proyectoPermission = proyectoPermission;
             _comentarioPermission = comentarioPermission;
+            _historialService = historialService;
         }
         // Métodos GET
         // Obtener los comentarios que ha hecho un usuario. Útil para ver una lsita de comentarios que un usario ha hecho en tu proyecto.
@@ -91,12 +95,15 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExitoso = await _repoComentario.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Comentario>.Mal("Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
 
+            // Registrar historial.
+            await _historialService.RegistrarComentarioAsync(comentario, usuarioId);
+
             return Result<Comentario>.Bien(comentario);
         }
 
         // Métodos PATCH
         // Modificar el contenido de un comentario.
-        public async Task <Result<Comentario>> PatchComentarioAsync(int idPropio, int idComentario, string contenidoComentario)
+        public async Task <Result<Comentario>> PatchComentarioAsync(int idPropia, int idComentario, string contenidoComentario)
         {
             int numeroCambios = 0;
             var comentario = await _repoComentario.ObtenerComentarioPorIdAsync(idComentario);
@@ -104,7 +111,7 @@ namespace TaskFlow.Infrastructure.Services
             if (comentario.Tarea is null) return Result<Comentario>.Mal("No existe la tarea del comentario que quieres modificar.");
 
             // Comprobaciones.
-            if (!await _comentarioPermission.PuedeCambiarComentarioAsync(idPropio, comentario)) return Result<Comentario>.Mal("No puedes modificar este comentario.");
+            if (!await _comentarioPermission.PuedeCambiarComentarioAsync(idPropia, comentario)) return Result<Comentario>.Mal("No puedes modificar este comentario.");
 
             // Realización de cambios.
             if(contenidoComentario is not null)
@@ -118,6 +125,9 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExitoso = await _repoComentario.GuardarCambiosAsync();
             if(!guardadoExitoso) return Result<Comentario>.Mal("Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
 
+            // Registrar historial.
+            await _historialService.ModificarComentarioAsync(comentario, idPropia);
+            
             return Result<Comentario>.Bien(comentario);
         }
     }

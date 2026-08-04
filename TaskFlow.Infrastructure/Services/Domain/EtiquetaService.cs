@@ -25,32 +25,5 @@ namespace TaskFlow.Infrastructure.Services
             return Result<Etiqueta>.Bien(etiqueta);
             
         }
-
-        //Peticiones POST
-        // Crear una etiqueta.
-        public async Task<Result<Etiqueta>> PostEtiquetaAsync(
-            string nombreEtiqueta,
-            string colorEtiqueta
-        )
-        {   
-            // Comprobar que la etiqueta no existe ya
-            var comprobarExistente = await _repoEtiqueta.ObtenerEtiquetaPorNombreYColorAsync(nombreEtiqueta, colorEtiqueta);
-
-            // Si ya existe, no la volvemos a crear, mandamos la que ya existia.
-            if (comprobarExistente is not null) return Result<Etiqueta>.Bien(comprobarExistente);
-
-            // Si no existe, la creamos
-            var etiqueta = new Etiqueta
-            {
-                Nombre = nombreEtiqueta,
-                Color = colorEtiqueta
-            };
-
-            await _repoEtiqueta.CrearEtiquetaAsync(etiqueta);
-            var guardadoExitoso = await _repoEtiqueta.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Etiqueta>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-
-            return Result<Etiqueta>.Bien(etiqueta);
-        }
     }
 }

@@ -6,7 +6,6 @@ using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Requests;
-using System.Collections;
 
 
 namespace TaskFlow.Infrastructure.Services
@@ -17,14 +16,18 @@ namespace TaskFlow.Infrastructure.Services
         private readonly ITareaRepository _repoTarea;
         private readonly ITareaEtiquetaService _TareaEtiquetaService;
         private readonly ITareaPermissionService _tareaPermissions;
+        private readonly IHIstorialService _historialService;
 
         public TareaService(ITareaRepository repoTarea,
         ITareaEtiquetaService TareaEtiquetaService,
-        ITareaPermissionService tareaPermissions)
+        ITareaPermissionService tareaPermissions,
+        IHIstorialService historialService
+        )
         {
             _repoTarea = repoTarea;
             _TareaEtiquetaService = TareaEtiquetaService;
             _tareaPermissions = tareaPermissions;
+            _historialService = historialService;
         }
 
         // Métodos GET
@@ -110,6 +113,8 @@ namespace TaskFlow.Infrastructure.Services
                 if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
             }
 
+            await _historialService.RegistrarTareaAsync(tarea);
+
             return Result<Tarea>.Bien(tarea);
         }
 
@@ -171,6 +176,8 @@ namespace TaskFlow.Infrastructure.Services
             if (numeroCambios == 0) return Result<Tarea>.Mal("No se han detectado cambios.");
             var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+            
+            await _historialService.ModificarTareaAsync(tarea, idPropia);
 
             return Result<Tarea>.Bien(tarea);
         }
@@ -194,6 +201,8 @@ namespace TaskFlow.Infrastructure.Services
             // Base de datos
             var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+
+            await _historialService.ModificarEstadoTareaAsync(tarea, idPropia);
             
             return Result<Tarea>.Bien(tarea);
 

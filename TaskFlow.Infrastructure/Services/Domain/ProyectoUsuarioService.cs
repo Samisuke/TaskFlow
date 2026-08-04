@@ -12,11 +12,16 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección del repositorio
         private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
         private readonly IProyectoPermissionService _proyectoPermission;
+        private readonly IHIstorialService _historialService;
 
-        public ProyectoUsuarioService(IProyectoUsuarioRepository repoProyectoUsuario, IProyectoPermissionService proyectoPermission)
+        public ProyectoUsuarioService(IProyectoUsuarioRepository repoProyectoUsuario,
+        IProyectoPermissionService proyectoPermission,
+        IHIstorialService historialService
+        )
         {
             _repoProyectoUsuario = repoProyectoUsuario;
             _proyectoPermission = proyectoPermission;
+            _historialService = historialService;
         }
 
         // Peticiones GET
@@ -66,6 +71,8 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
 
+            await _historialService.AñadirPersonaProyectoAsync(proyectoId, idPropia);
+
             return Result<ProyectoUsuario>.Bien(usuario);
         }
 
@@ -74,18 +81,18 @@ namespace TaskFlow.Infrastructure.Services
         public async Task<Result<ProyectoUsuario>> PatchUsuarioAsync(
             int idPropia,
             int idUsuarioACambiar,
-            int idProyecto,
+            int proyectoId,
             bool? activoUsuario,
             RolProyecto? rolUsuario
         )
         {
             int numeroCambios = 0;
 
-            var usuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idUsuarioACambiar);
+            var usuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(proyectoId, idUsuarioACambiar);
             if (usuario is null) return Result<ProyectoUsuario>.Mal("No se encuentra el usuario.");
 
             // Comprobaciones
-            if (!await _proyectoPermission.PuedeModificarProyectoAsync(idProyecto, idPropia))
+            if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyectoId, idPropia))
 
             // Realización de cambios.
             if (activoUsuario.HasValue)
@@ -103,6 +110,8 @@ namespace TaskFlow.Infrastructure.Services
             if (numeroCambios == 0) return Result<ProyectoUsuario>.Mal("No se han detectado cambios para realizar.");
             var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
+
+            await _historialService.ModificarPersonaProyectoAsync(proyectoId, idPropia);
 
             return Result<ProyectoUsuario>.Bien(usuario);
         }

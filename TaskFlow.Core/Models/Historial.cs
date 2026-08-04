@@ -7,8 +7,8 @@ namespace TaskFlow.Core.Models
     public class Historial
     {
         public int Id {get; set;}
-        public int TareaId {get; set;}
-        public Tarea? Tarea {get; set;}
+        public int ProyectoId {get; set;}
+        public Proyecto? Proyecto {get; set;}
         public string Accion {get; set;} = string.Empty;
         public DateTime Fecha {get; set;}
         public int UsuarioId {get; set;}

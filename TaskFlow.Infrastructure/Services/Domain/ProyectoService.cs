@@ -13,16 +13,20 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección del repositorio
         private readonly IProyectoRepository _repoProyecto;
         private readonly IUsuarioRepository _repoUsuario;
-      private readonly IProyectoPermissionService _proyectoPermission;
+        private readonly IProyectoPermissionService _proyectoPermission;
+        private readonly IHIstorialService _historialService;
 
         public ProyectoService(
         IProyectoRepository repoProyecto,
         IUsuarioRepository repoUsuario,
-        IProyectoPermissionService proyectoPermission)
+        IProyectoPermissionService proyectoPermission,
+        IHIstorialService historialService
+        )
         {
             _repoProyecto = repoProyecto;
             _repoUsuario = repoUsuario;
             _proyectoPermission = proyectoPermission;
+            _historialService = historialService;
         }
 
         // Métodos GET
@@ -111,6 +115,8 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
             if (!guardadoExistoso) return Result<Proyecto>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
 
+            await _historialService.ModificarProyectoAsync(proyecto, idPropia);
+
             return Result<Proyecto>.Bien(proyecto);
         }
 
@@ -146,6 +152,8 @@ namespace TaskFlow.Infrastructure.Services
             // Base de datos
             var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
             if (!guardadoExistoso) return Result<Proyecto>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+
+            await _historialService.ModificarDueñoProyectoAsync(proyecto, idPropia);
 
             return Result<Proyecto>.Bien(proyecto);
         }

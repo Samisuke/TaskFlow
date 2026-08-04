@@ -2,6 +2,7 @@ using TaskFlow.Core.Services;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using Taskflow.Core.Repositories;
+using TaskFlow.Core.Requests;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -24,27 +25,104 @@ namespace TaskFlow.Infrastructure.Services
 
             return Result<IEnumerable<Historial>>.Bien(historial);
         }
-
-        //Peticiones POST
-        // Crear un "cambio" en la tarea.
-        public async Task<Result<Historial>> PostTareaAsync(
-            int tareaId,
+        
+        // Método privado "padre"
+        private async Task RegistrarAsync(
+            int proyectoId,
             int usuarioId,
-            string accion
-        )
+            string accion)
         {
             var historial = new Historial
             {
-                TareaId = tareaId,
-                Accion = accion,
+                ProyectoId = proyectoId,
                 UsuarioId = usuarioId,
+                Accion = accion,
                 Fecha = DateTime.UtcNow
             };
 
-            var guardadoExitoso = await _repoHistorial.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Historial>.Mal("ERROR. Fallo inesperado al guardar el historial. Inténtalo de nuevo más tarde.");
+            await _repoHistorial.CrearHistorialAsync(historial);
+            await _repoHistorial.GuardarCambiosAsync();
+        }
 
-            return Result<Historial>.Bien(historial);
+        // Registrar un comentario
+        public async Task RegistrarComentarioAsync(Comentario comentario, int idPropia)
+        {
+            await RegistrarAsync(
+                comentario.Tarea.ProyectoId,
+                idPropia,
+                HistorialActions.ComentarioCreado);
+        }
+
+        // Modificar un comentario
+        public async Task ModificarComentarioAsync(Comentario comentario, int idPropia)
+        {
+            await RegistrarAsync(
+                comentario.Tarea.ProyectoId,
+                idPropia,
+                HistorialActions.ComentarioModificado);
+        }
+
+        // Modificar un proyecto
+        public async Task ModificarProyectoAsync(Proyecto proyecto, int idPropia)
+        {
+            await RegistrarAsync(
+                proyecto.Id,
+                idPropia,
+                HistorialActions.ProyectoModificado);
+        }
+
+        // Modificar dueño de un proyecto
+        public async Task ModificarDueñoProyectoAsync(Proyecto proyecto, int idPropia)
+        {
+            await RegistrarAsync(
+                proyecto.Id,
+                idPropia,
+                HistorialActions.ProyectoDueñoModificado);
+        }
+
+        // Añadir persona a un proyecto
+        public async Task AñadirPersonaProyectoAsync(int proyectoId, int idPropia)
+        {
+            await RegistrarAsync(
+                proyectoId,
+                idPropia,
+                HistorialActions.AñadirPersona);
+        }
+
+        // Modificar persona de un proyecto
+        public async Task ModificarPersonaProyectoAsync(int proyectoId, int idPropia)
+        {
+            await RegistrarAsync(
+                proyectoId,
+                idPropia,
+                HistorialActions.ModificarPersonaEnProyecto);
+        }
+
+        // Registrar una tarea
+        public async Task RegistrarTareaAsync(Tarea tarea)
+         {
+            await RegistrarAsync(
+                tarea.ProyectoId,
+                tarea.CreadorId,
+                HistorialActions.AñadirTarea);
+        }
+
+        // Modificar una tarea
+        public async Task ModificarTareaAsync(Tarea tarea, int idPropio)
+         {
+            await RegistrarAsync(
+                tarea.ProyectoId,
+                idPropio,
+                HistorialActions.ModificarTarea);
+        }
+
+        // Modificar el estado de una  tarea
+        public async Task ModificarEstadoTareaAsync(Tarea tarea, int idPropio)
+         {
+            await RegistrarAsync(
+                tarea.ProyectoId,
+                idPropio,
+                HistorialActions.ModificarEstadoTarea);
         }
     }
 }
