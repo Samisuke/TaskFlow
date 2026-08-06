@@ -2,6 +2,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.Comentario;
 using TaskFlow.Core.Services;
+using System.Security.Claims;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -18,8 +19,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("mis-comentarios")]
-        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosPropios(int id) // CAMBIO: Cambiar este ID por el JWT
+        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosPropios()
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(id);
             if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
 
@@ -56,9 +58,10 @@ namespace TaskFlow.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> PostComentario([FromBody] ComentarioWriteDto comentarioWriteDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var comentario = await _comentarioService.PostComentarioAsync(
                 comentarioWriteDto.Contenido,
-                comentarioWriteDto.UsuarioId, // CAMBIO: Cambiar esta id por la del JWT
+                id,
                 comentarioWriteDto.TareaId
             );
             if (!comentario.EsCorrecto ||comentario.Valor is null) return BadRequest(comentario.MensajeError);
@@ -67,12 +70,13 @@ namespace TaskFlow.Api.Controllers
             return CreatedAtAction(nameof(GetComentarioId), new {id = comentarioDto.Id}, comentarioDto);
         }
 
-        [HttpPatch("{id}")]
-        public async Task<ActionResult> PatchComentario(int id, [FromBody] ComentarioPatchDto comentarioPatchDto, int idPropia) // CAMBIO: Cambiar esta ID por JWT
+        [HttpPatch("{idComentario}")]
+        public async Task<ActionResult> PatchComentario(int idComentario, [FromBody] ComentarioPatchDto comentarioPatchDto)
         {
-           var comentario = await _comentarioService.PatchComentarioAsync(
-                idPropia,
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var comentario = await _comentarioService.PatchComentarioAsync(
                 id,
+                idComentario,
                 comentarioPatchDto.Contenido
             );
             if (!comentario.EsCorrecto ||comentario.Valor is null) return BadRequest(comentario.MensajeError); 

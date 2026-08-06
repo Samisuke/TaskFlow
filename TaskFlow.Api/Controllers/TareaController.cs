@@ -2,6 +2,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.Tarea;
 using TaskFlow.Core.Services;
+using System.Security.Claims;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -26,8 +27,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("mis-tareas")]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasPendientes(int id) // CAMBIO: Cambiar este id por el JWT
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasPendientes()
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tareas = await _tareaService.GetTareasPendientesDeUsuarioAsync(id);
             if(!tareas.EsCorrecto || tareas.Valor is null) return BadRequest(tareas.MensajeError);
 
@@ -35,8 +37,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("tareas-asignadas")]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasAsignadas(int id) // CAMBIO: Cambiar este id por el JWT
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasAsignadas() 
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tareas = await _tareaService.GetTareasDadasDeUsuarioAsync(id);
             if(!tareas.EsCorrecto || tareas.Valor is null) return BadRequest(tareas.MensajeError);
 
@@ -53,8 +56,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostTarea(int id, [FromBody] TareaWriteDto tareaWriteDto) // CAMBIO: poner id del JWT
+        public async Task<ActionResult> PostTarea([FromBody] TareaWriteDto tareaWriteDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PostTareaAsync(
                 id,
                 tareaWriteDto.Titulo,
@@ -72,12 +76,13 @@ namespace TaskFlow.Api.Controllers
             return CreatedAtAction(nameof(GetTarea), new {id = tareaDto.Id}, tareaDto);
         }
 
-        [HttpPatch("{id}")]
-        public async Task<ActionResult> PatchTarea(int id, [FromBody] TareaPatchDto tareaPatchDto, int idPropia) //CAMBIO: Cambiar idPropia por la del JWT
+        [HttpPatch("{idTarea}")]
+        public async Task<ActionResult> PatchTarea(int idTarea, [FromBody] TareaPatchDto tareaPatchDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PatchTareaAsync(
-                idPropia,
                 id,
+                idTarea,
                 tareaPatchDto.Titulo,
                 tareaPatchDto.Descripcion,
                 tareaPatchDto.Prioridad,
@@ -90,12 +95,13 @@ namespace TaskFlow.Api.Controllers
             return Ok(tareaDto);
         }
 
-        [HttpPatch("{id}/estado")]
-        public async Task<ActionResult> PatchEstadoTarea(int id, [FromBody] TareaEstadoPatchDto tareaPatchDto, int idPropia) //CAMBIO: Cambiar idPropia por la del JWT
+        [HttpPatch("{idTarea}/estado")]
+        public async Task<ActionResult> PatchEstadoTarea(int idTarea, [FromBody] TareaEstadoPatchDto tareaPatchDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PatchEstadoTareaAsync(
-                idPropia,
                 id,
+                idTarea,
                 tareaPatchDto.Estado
             );
             if (!tarea.EsCorrecto || tarea.Valor is null) return BadRequest(tarea.MensajeError);

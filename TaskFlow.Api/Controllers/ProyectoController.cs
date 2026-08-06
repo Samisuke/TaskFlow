@@ -2,6 +2,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.Proyecto;
 using TaskFlow.Core.Services;
+using System.Security.Claims;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -51,8 +52,9 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener los proyectos propios.
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosPropios(int id) // CAMBIO: usar JWT id, no idPropia
+        public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosPropios()
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var proyectos = await _proyectoService.GetProyectosDeUnaPersonaAsync(id);
             if (!proyectos.EsCorrecto || proyectos.Valor is null) return NotFound(proyectos.MensajeError);
 
@@ -63,10 +65,11 @@ namespace TaskFlow.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> PostProyecto([FromBody] ProyectoWriteDto proyectoDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var proyectoNuevo = await _proyectoService.PostProyectoAsync(
                 proyectoDto.Nombre,
                 proyectoDto.Descripcion,
-                // CAMBIO: Poner el id del usuario sacado del JWT.
+                id
             );
 
             if (!proyectoNuevo.EsCorrecto || proyectoNuevo.Valor is null) return BadRequest(proyectoNuevo.MensajeError);
@@ -76,12 +79,13 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Modificar un proyecto
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<ProyectoReadDto>> PatchProyecto(int id, [FromBody] ProyectoPatchDto proyectoDto, int idPropia) // CAMBIO: usar JWT id, no idPropia
+        [HttpPatch("{idProyecto}")]
+        public async Task<ActionResult<ProyectoReadDto>> PatchProyecto(int idProyecto, [FromBody] ProyectoPatchDto proyectoDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cambios = await _proyectoService.PatchProyectoAsync(
-                idPropia,
                 id,
+                idProyecto,
                 proyectoDto.Nombre,
                 proyectoDto.Descripcion
             );
@@ -92,10 +96,11 @@ namespace TaskFlow.Api.Controllers
 
         // Cambiar propietario de un proyecto
         [HttpPatch("{idProyecto}/owner")]
-        public async Task<ActionResult<ProyectoReadDto>> TransferirPropiedadProyecto(int idProyecto, int idPropia, [FromBody] ProyectoPatchDueñoDto proyectoPatchDueñoDto) // CAMBIO: usar JWT id, no idPropia
+        public async Task<ActionResult<ProyectoReadDto>> TransferirPropiedadProyecto(int idProyecto, [FromBody] ProyectoPatchDueñoDto proyectoPatchDueñoDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cambioPropietario = await _proyectoService.PatchDueñoProyectoAsync(
-                idPropia,
+                id,
                 idProyecto,
                 proyectoPatchDueñoDto.NuevoPropietarioId
             );

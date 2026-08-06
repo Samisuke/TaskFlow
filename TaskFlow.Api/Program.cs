@@ -1,14 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.Infrastructure.Data;
 using TaskFlow.Api.Config.MapsterConfig;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 using TaskFlow.Infrastructure.Services;
 using TaskFlow.Infrastructure.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Repositories;
-
-
-
+using TaskFlow.Core.Services.Token;
+using TaskFlow.Infrastructure.Services.Token;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,8 @@ builder.Services.AddScoped<IProyectoUsuarioRepository, ProyectoUsuarioRepository
 builder.Services.AddScoped<IProyectoUsuarioService, ProyectoUsuarioService>();
 builder.Services.AddScoped<ITareaEtiquetaRepository, TareaEtiquetaRepository>();
 builder.Services.AddScoped<ITareaEtiquetaService, TareaEtiquetaService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+
 // Scopes de permissions
 builder.Services.AddScoped<IProyectoPermissionService, ProyectoPermissionService>();
 builder.Services.AddScoped<IComentarioPermissionService, ComentarioPermissionService>();
@@ -45,14 +49,48 @@ builder.Services.AddDbContext<TaskFlowDbContext>(options =>
 // Mapster
 builder.Services.AddMapsterMappings();
 
+//JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException("JWT configuration missing: Jwt:Key");
+}
+var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+builder.Services.AddAuthentication(config =>
+{
+    config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(config =>
+{
+    config.RequireHttpsMetadata = false; // False para las pruebas, debería ser true en la version final.
+    config.SaveToken = true;
+    config.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
 var app = builder.Build();
+
+
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 app.UseHttpsRedirection();
+
+builder.Services.AddAuthorization();
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

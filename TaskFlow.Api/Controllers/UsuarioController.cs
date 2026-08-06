@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Core.Services;
 using TaskFlow.Api.Dto.Usuario;
 using Mapster;
+using System.Security.Claims;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -19,8 +20,9 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener un usuario por ID.
         [HttpGet("{id}")]
-        public async Task<ActionResult<UsuarioReadDto>> GetUsuario(int id) // CAMBIO: Cambiar esta ID por la de JWT
+        public async Task<ActionResult<UsuarioReadDto>> GetUsuario()
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.GetUsuarioPorIdAsync(id);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
@@ -29,8 +31,9 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener tu perfil personal.
         [HttpGet("perfil")]
-        public async Task<ActionResult<UsuarioReadDto>> GetTuPerfil(int id) // CAMBIO: Cambiar esta ID por la de JWT
+        public async Task<ActionResult<UsuarioReadDto>> GetTuPerfil()
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.GetUsuarioPorIdAsync(id);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
@@ -39,7 +42,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener un usuario por email.
         [HttpGet("buscar/{email}")]
-        public async Task<ActionResult<UsuarioReadDto>> GetUsuarioPorEmail(string email) // CAMBIO: Cambiar esta ID por la de JWT
+        public async Task<ActionResult<UsuarioReadDto>> GetUsuarioPorEmail(string email)
         {
             var usuario = await _usuarioService.GetUsuarioPorEmailAsync(email);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
@@ -66,8 +69,9 @@ namespace TaskFlow.Api.Controllers
 
         // Modificar tu perfil.
         [HttpPatch]
-        public async Task<ActionResult> PatchUsuario(int id, [FromBody] UsuarioPatchDto usuarioPatchDto) // CAMBIO: Cambiar esta ID por la de JWT
+        public async Task<ActionResult> PatchUsuario([FromBody] UsuarioPatchDto usuarioPatchDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.PatchUsuarioAsync(
                 id,
                 usuarioPatchDto.Nombre,
@@ -83,8 +87,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Cambiar tu contraseña.
-        public async Task<ActionResult> PatchPassUsuario(int id, [FromBody] UsuarioPassDto usuarioPassDto) // CAMBIO: Cambiar esta ID por la de JWT
+        public async Task<ActionResult> PatchPassUsuario([FromBody] UsuarioPassDto usuarioPassDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.PatchUsuarioPassAsync(
                 id,
                 usuarioPassDto.PassNueva,

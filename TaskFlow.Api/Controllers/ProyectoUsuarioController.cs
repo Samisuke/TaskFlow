@@ -2,6 +2,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.ProyectoUsuario;
 using TaskFlow.Core.Services;
+using System.Security.Claims;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -36,8 +37,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostProyectoUsuario([FromBody] ProyectoUsuarioWriteDto proyetoUsuarioWriteDto, int id) // CAMBIO: Cambiar ID por la del JWT
+        public async Task<ActionResult> PostProyectoUsuario([FromBody] ProyectoUsuarioWriteDto proyetoUsuarioWriteDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var miembroProyecto = await _pusuarioService.PostUsuarioAsync(
                 id,
                 proyetoUsuarioWriteDto.UsuarioId,
@@ -50,12 +52,13 @@ namespace TaskFlow.Api.Controllers
             return Ok(usuarioDto);
         }
 
-        [HttpPatch("proyecto/{idProyecto}/usuario/{id}")]
-        public async Task<ActionResult> PatchUsuarioProyecto(int idProyecto,int id, [FromBody] ProyectoUsuarioPathcDto proyetoUsuarioPathcDto, int idPropia) // CAMBIO: Cambiar ID propia por JWT
+        [HttpPatch("proyecto/{idProyecto}/usuario/{idUsuario}")]
+        public async Task<ActionResult> PatchUsuarioProyecto(int idProyecto,int idUsuario, [FromBody] ProyectoUsuarioPathcDto proyetoUsuarioPathcDto)
         {
+            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _pusuarioService.PatchUsuarioAsync(
-                idPropia,
                 id,
+                idUsuario,
                 idProyecto,
                 proyetoUsuarioPathcDto.Activo,
                 proyetoUsuarioPathcDto.Rol
