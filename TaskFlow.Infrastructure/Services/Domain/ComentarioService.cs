@@ -102,9 +102,10 @@ namespace TaskFlow.Infrastructure.Services
 
         // Métodos PATCH
         // Modificar el contenido de un comentario.
-        public async Task <Result<Comentario>> PatchComentarioAsync(int idPropia, int idComentario, string contenidoComentario)
+        public async Task <Result<Comentario>> PatchComentarioAsync(int idPropia, int idComentario, string? contenidoComentario)
         {
             int numeroCambios = 0;
+            
             var comentario = await _repoComentario.ObtenerComentarioPorIdAsync(idComentario);
             if (comentario is null) return Result<Comentario>.Mal("No existe el comentario que quieres modificar.");
             if (comentario.Tarea is null) return Result<Comentario>.Mal("No existe la tarea del comentario que quieres modificar.");

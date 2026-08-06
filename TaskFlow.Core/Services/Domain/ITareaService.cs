@@ -23,7 +23,7 @@ namespace TaskFlow.Core.Services
             DateTimeOffset fechaLimiteTarea,
             int proyectoId,
             int asignadoId,
-            IEnumerable<NuevaEtiqueta> etiquetas
+            List<NuevaEtiqueta> etiquetas
         );
 
         // Métodos PATCH
@@ -34,7 +34,7 @@ namespace TaskFlow.Core.Services
             string? descripcionTarea,
             PrioridadTarea? prioridadTareaTarea,
             DateTimeOffset? fechaLimiteTarea,
-            IEnumerable<NuevaEtiqueta> etiquetas
+            List<NuevaEtiqueta> etiquetas
         );
 
         Task <Result<Tarea>> PatchEstadoTareaAsync(

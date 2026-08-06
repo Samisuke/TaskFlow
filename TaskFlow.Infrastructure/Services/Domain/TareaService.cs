@@ -75,7 +75,7 @@ namespace TaskFlow.Infrastructure.Services
             DateTimeOffset fechaLimiteTarea,
             int proyectoId,
             int asignadoId,
-            IEnumerable<NuevaEtiqueta> etiquetas
+            List<NuevaEtiqueta> etiquetas
         )
         {
             // Comprobaciones.
@@ -124,7 +124,7 @@ namespace TaskFlow.Infrastructure.Services
             string? descripcionTarea,
             PrioridadTarea? prioridadTareaTarea,
             DateTimeOffset? fechaLimiteTarea,
-            IEnumerable<NuevaEtiqueta> etiquetas
+            List<NuevaEtiqueta> etiquetas
         )
         {
             int numeroCambios = 0;

@@ -1,4 +1,5 @@
 using TaskFlow.Core.Enums;
+using TaskFlow.Core.Requests;
 
 namespace TaskFlow.Api.Dto.Tarea
 {
@@ -14,7 +15,6 @@ namespace TaskFlow.Api.Dto.Tarea
         public int AsignadoId {get; set;}
 
         // Etiqueta
-        public string? NombreEtiqueta {get; set;} = string.Empty;
-        public string? ColorEtiqueta {get; set;} = string.Empty;
+        public List<NuevaEtiqueta> Etiquetas {get; set;} = [];
     }
 }

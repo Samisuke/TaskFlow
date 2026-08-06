@@ -1,7 +1,7 @@
 using TaskFlow.Core.Enums;
 namespace TaskFlow.Api.Dto.ProyectoUsuario
 {
-    public class ProyetoUsuarioWriteDto
+    public class ProyectoUsuarioWriteDto
     {
         public int UsuarioId {get; set;}
         public int ProyectoId {get; set;}

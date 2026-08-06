@@ -1,11 +1,17 @@
+using TaskFlow.Core.Requests;
+using TaskFlow.Core.Enums;
+
 namespace TaskFlow.Api.Dto.Tarea
 {
-    public class TareaResumenDto
+    public class TareaPatchDto
     {
         public string Titulo {get; set;} = string.Empty;
         public string Descripcion {get; set;} = string.Empty;
-        public string Estado {get; set;} = string.Empty;
-        public string Prioridad {get; set;} = string.Empty;
+        public EstadoTarea Estado {get; set;}
+        public PrioridadTarea Prioridad {get; set;}
         public DateTimeOffset FechaLimite {get; set;}
+
+        // Etiqueta
+        public List<NuevaEtiqueta> Etiquetas {get; set;} = [];
     }
 }
