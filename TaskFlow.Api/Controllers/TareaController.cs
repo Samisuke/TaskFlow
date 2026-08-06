@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.Tarea;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -18,6 +19,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("proyecto/{idProyecto}/tareas")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasProyecto(int idProyecto)
         {
             var tareas = await _tareaService.GetTareasDeUnProyectoAsync(idProyecto);
@@ -27,6 +29,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("mis-tareas")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasPendientes()
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -37,6 +40,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("tareas-asignadas")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasAsignadas() 
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -47,6 +51,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<TareaReadDto>> GetTarea(int id)
         {
             var tarea = await _tareaService.GetTareaPorIdAsync(id);
@@ -56,6 +61,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> PostTarea([FromBody] TareaWriteDto tareaWriteDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -77,6 +83,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPatch("{idTarea}")]
+        [Authorize]
         public async Task<ActionResult> PatchTarea(int idTarea, [FromBody] TareaPatchDto tareaPatchDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -96,6 +103,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPatch("{idTarea}/estado")]
+        [Authorize]
         public async Task<ActionResult> PatchEstadoTarea(int idTarea, [FromBody] TareaEstadoPatchDto tareaPatchDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

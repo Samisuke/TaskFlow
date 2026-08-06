@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.Comentario;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -19,6 +20,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("mis-comentarios")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosPropios()
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -29,6 +31,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<ComentarioReadDto>> GetComentarioId(int id)
         {
             var comentario = await _comentarioService.GetComentarioPorIdAsync(id);
@@ -38,6 +41,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("usuario/{id}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosUsuario(int id)
         {
             var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(id);
@@ -47,6 +51,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("tarea/{idTarea}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosTarea(int idTarea)
         {
             var comentarios = await _comentarioService.GetComentariosDeUnaTareaAsync(idTarea);
@@ -56,6 +61,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> PostComentario([FromBody] ComentarioWriteDto comentarioWriteDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -71,6 +77,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPatch("{idComentario}")]
+        [Authorize]
         public async Task<ActionResult> PatchComentario(int idComentario, [FromBody] ComentarioPatchDto comentarioPatchDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

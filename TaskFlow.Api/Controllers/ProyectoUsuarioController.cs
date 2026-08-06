@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.ProyectoUsuario;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -19,6 +20,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("proyecto/{idProyecto}/usuario/{id}")]
+        [Authorize]
         public async Task<ActionResult<ProyectoUsuarioReadDto>> GetProyectoUsuario(int idProyecto, int id)
         {
             var usuario = await _pusuarioService.GetUsuarioDeUnProyectoAsync(idProyecto, id);
@@ -28,6 +30,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpGet("proyecto/{idProyecto}/usuarios")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ProyectoUsuarioReadDto>>> GetUsuariosProyecto(int idProyecto)
         {
             var usuario = await _pusuarioService.GetTodosLosUsuariosDeUnProyectoAsync(idProyecto);
@@ -37,6 +40,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> PostProyectoUsuario([FromBody] ProyectoUsuarioWriteDto proyetoUsuarioWriteDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -53,6 +57,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         [HttpPatch("proyecto/{idProyecto}/usuario/{idUsuario}")]
+        [Authorize]
         public async Task<ActionResult> PatchUsuarioProyecto(int idProyecto,int idUsuario, [FromBody] ProyectoUsuarioPathcDto proyetoUsuarioPathcDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

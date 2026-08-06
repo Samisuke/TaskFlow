@@ -3,6 +3,7 @@ using TaskFlow.Core.Services;
 using TaskFlow.Api.Dto.Usuario;
 using Mapster;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -31,6 +32,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener tu perfil personal.
         [HttpGet("perfil")]
+        [Authorize]
         public async Task<ActionResult<UsuarioReadDto>> GetTuPerfil()
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -42,6 +44,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener un usuario por email.
         [HttpGet("buscar/{email}")]
+        [Authorize]
         public async Task<ActionResult<UsuarioReadDto>> GetUsuarioPorEmail(string email)
         {
             var usuario = await _usuarioService.GetUsuarioPorEmailAsync(email);
@@ -69,6 +72,7 @@ namespace TaskFlow.Api.Controllers
 
         // Modificar tu perfil.
         [HttpPatch]
+        [Authorize]
         public async Task<ActionResult> PatchUsuario([FromBody] UsuarioPatchDto usuarioPatchDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -85,7 +89,8 @@ namespace TaskFlow.Api.Controllers
             return Ok(usuarioDto);
 
         }
-
+        [HttpPatch("cambiar-pass")]
+        [Authorize]
         // Cambiar tu contraseña.
         public async Task<ActionResult> PatchPassUsuario([FromBody] UsuarioPassDto usuarioPassDto)
         {

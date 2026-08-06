@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Dto.Proyecto;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -22,6 +23,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener un solo proyecto por su ID.
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<ProyectoReadDto>> GetProyecto(int id)
         {
             var proyecto = await _proyectoService.GetProyectoPorIdAsync(id);
@@ -32,6 +34,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener los proyectos en los que trabaja un usuario.
         [HttpGet("usuario/{usuarioId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosDeUsuario(int usuarioId)
         {
             var proyectos = await _proyectoService.GetProyectosDeUnaPersonaAsync(usuarioId);
@@ -42,6 +45,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener los proyectos creados por un usuario.
         [HttpGet("propietario/{propietarioId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosDeCreador(int propietarioId)
         {
             var proyectos = await _proyectoService.GetProyectosDeUnCreadorAsync(propietarioId);
@@ -52,6 +56,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener los proyectos propios.
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosPropios()
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -63,6 +68,7 @@ namespace TaskFlow.Api.Controllers
 
         // Crear un proyecto.
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> PostProyecto([FromBody] ProyectoWriteDto proyectoDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -80,6 +86,7 @@ namespace TaskFlow.Api.Controllers
 
         // Modificar un proyecto
         [HttpPatch("{idProyecto}")]
+        [Authorize]
         public async Task<ActionResult<ProyectoReadDto>> PatchProyecto(int idProyecto, [FromBody] ProyectoPatchDto proyectoDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -96,6 +103,7 @@ namespace TaskFlow.Api.Controllers
 
         // Cambiar propietario de un proyecto
         [HttpPatch("{idProyecto}/owner")]
+        [Authorize]
         public async Task<ActionResult<ProyectoReadDto>> TransferirPropiedadProyecto(int idProyecto, [FromBody] ProyectoPatchDueñoDto proyectoPatchDueñoDto)
         {
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
