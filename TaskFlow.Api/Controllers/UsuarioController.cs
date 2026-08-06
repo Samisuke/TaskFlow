@@ -65,7 +65,35 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Modificar tu perfil.
+        [HttpPatch]
+        public async Task<ActionResult> PatchUsuario(int id, [FromBody] UsuarioPatchDto usuarioPatchDto) // CAMBIO: Cambiar esta ID por la de JWT
+        {
+            var usuario = await _usuarioService.PatchUsuarioAsync(
+                id,
+                usuarioPatchDto.Nombre,
+                usuarioPatchDto.Apellidos,
+                usuarioPatchDto.Email,
+                usuarioPatchDto.Activo
+            );
+            if (usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
+
+            var usuarioDto = usuario.Valor.Adapt<UsuarioReadDto>();
+            return Ok(usuarioDto);
+
+        }
 
         // Cambiar tu contraseña.
+        public async Task<ActionResult> PatchPassUsuario(int id, [FromBody] UsuarioPassDto usuarioPassDto) // CAMBIO: Cambiar esta ID por la de JWT
+        {
+            var usuario = await _usuarioService.PatchUsuarioPassAsync(
+                id,
+                usuarioPassDto.PassNueva,
+                usuarioPassDto.PassAntigua
+            );
+            if (!usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
+
+            var usuarioDto = usuario.Valor.Adapt<UsuarioReadDto>();
+            return Ok(usuarioDto);
+        }
     }
 }

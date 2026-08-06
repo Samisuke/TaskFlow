@@ -2,6 +2,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Models;
+using BCrypt;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -9,9 +10,12 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección del repositorio
         private readonly IUsuarioRepository _repoUsuario;
-        public UsuarioService(IUsuarioRepository repoUsuario)
+        private readonly IPassPermissionService _passPermission;
+
+        public UsuarioService(IUsuarioRepository repoUsuario, IPassPermissionService passPermission)
         {
             _repoUsuario = repoUsuario;
+            _passPermission = passPermission;
         }
 
         // Métodos GET
@@ -59,7 +63,7 @@ namespace TaskFlow.Infrastructure.Services
                 Nombre = nombreUsuario,
                 Apellidos = apellidosUsuario,
                 Email = emailUsuario,
-                PasswordHash = passUsuario,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(passUsuario),
                 FechaRegistro = DateTime.UtcNow,
                 Activo = activoUsuario
             };
@@ -118,24 +122,22 @@ namespace TaskFlow.Infrastructure.Services
             return Result<Usuario>.Bien(usuario);
         }
 
-        public async Task<Result<Usuario>> PatchUsuarioPassAsync(int idUsuario, string? passNueva)
+        public async Task<Result<Usuario>> PatchUsuarioPassAsync(int idUsuario, string passNueva, string passAntigua)
         {
-            int numeroCambios = 0;
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
-            if (usuario is null) return Result<Usuario>.Mal("ERROR. Usuario no encontrado.");
-            
-            // Cambios.
-            if (passNueva is not null)
-            {
-                //Convertir contraseña a segura.
-                usuario.PasswordHash = passNueva;
-                numeroCambios += 1;
-            } 
 
+            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
+            if (usuario is null) return Result<Usuario>.Mal("Usuario no encontrado.");
+            
+            
+            // Comprobaciones.
+            var comprobaciones = _passPermission.ComprobacionesPass(usuario, passAntigua, passNueva);
+            if (!comprobaciones.EsCorrecto) return Result<Usuario>.Mal(comprobaciones.Error);
+            
+            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(passNueva);
+            
             // Base de datos.
-            if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios");
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+            if (!guardadoExitoso) return Result<Usuario>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
 
             return Result<Usuario>.Bien(usuario);
         }

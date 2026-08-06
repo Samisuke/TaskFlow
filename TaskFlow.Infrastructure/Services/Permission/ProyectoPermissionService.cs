@@ -27,7 +27,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Contiene las comprobaciones para poder modificar un proyecto.
-        public async Task<bool>PuedeModificarProyectoAsync(int idProyecto, int idPropia)
+        public async Task<bool> PuedeModificarProyectoAsync(int idProyecto, int idPropia)
         {
             var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idPropia);
             

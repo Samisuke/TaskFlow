@@ -36,6 +36,7 @@ builder.Services.AddScoped<ITareaEtiquetaService, TareaEtiquetaService>();
 builder.Services.AddScoped<IProyectoPermissionService, ProyectoPermissionService>();
 builder.Services.AddScoped<IComentarioPermissionService, ComentarioPermissionService>();
 builder.Services.AddScoped<ITareaPermissionService, TareaPermissionService>();
+builder.Services.AddScoped<IPassPermissionService, PassPermissionService>();
 
 // Inyección del context
 builder.Services.AddDbContext<TaskFlowDbContext>(options =>

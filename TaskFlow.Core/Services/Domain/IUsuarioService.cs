@@ -28,7 +28,7 @@ namespace TaskFlow.Core.Services
             string? emailUsuario,
             bool? Activo
         );
-        Task<Result<Usuario>> PatchUsuarioPassAsync(int idUsuario, string? passNueva);
+        Task<Result<Usuario>> PatchUsuarioPassAsync(int idUsuario, string passNueva, string passAntigua);
 
     
     }
