@@ -4,7 +4,7 @@ namespace TaskFlow.Core.Dto.ProyectoUsuario
 {
     public class ProyectoUsuarioPathcDto
     {
-        public bool Activo {get; set;}
-        public RolProyecto Rol {get; set;}
+        public bool? Activo {get; set;}
+        public RolProyecto? Rol {get; set;}
     }
 }
