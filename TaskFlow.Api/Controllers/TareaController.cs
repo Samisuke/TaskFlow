@@ -4,6 +4,7 @@ using TaskFlow.Core.Dto.Tarea;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using TaskFlow.Core.Validations;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -13,9 +14,19 @@ namespace TaskFlow.Api.Controllers
     public class TareaController : ControllerBase
     {
         private readonly ITareaService _tareaService;
-        public TareaController(ITareaService tareaService)
+        private readonly TareaValidator _validator;
+        private readonly TareaPatchValidator _validatorPatch;
+        private readonly TareaEstadoPatchValidator _validatorEstado;
+        public TareaController(ITareaService tareaService,
+            TareaValidator validator,
+            TareaPatchValidator validatorPatch,
+            TareaEstadoPatchValidator validatorEstado
+        )
         {
             _tareaService = tareaService;
+            _validator = validator;
+            _validatorPatch = validatorPatch;
+            _validatorEstado = validatorEstado;
         }
 
         [HttpGet("proyecto/{idProyecto}/tareas")]
@@ -64,6 +75,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PostTarea([FromBody] TareaWriteDto tareaWriteDto)
         {
+            var validationResult = await _validator.ValidateAsync(tareaWriteDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PostTareaAsync(
                 id,
@@ -86,6 +107,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PatchTarea(int idTarea, [FromBody] TareaPatchDto tareaPatchDto)
         {
+            var validationResult = await _validatorPatch.ValidateAsync(tareaPatchDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PatchTareaAsync(
                 id,
@@ -106,6 +137,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PatchEstadoTarea(int idTarea, [FromBody] TareaEstadoPatchDto tareaPatchDto)
         {
+            var validationResult = await _validatorEstado.ValidateAsync(tareaPatchDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PatchEstadoTareaAsync(
                 id,

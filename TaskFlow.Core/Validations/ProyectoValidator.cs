@@ -39,7 +39,8 @@ namespace TaskFlow.Core.Validations
         public ProyectoPatchDueñoValidator()
         {
             RuleFor(x => x.NuevoPropietarioId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .GreaterThan(0)
+                .WithMessage("El usuario indicado no es válido.");
         }
     }
 }

@@ -4,6 +4,7 @@ using TaskFlow.Core.Dto.Comentario;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using TaskFlow.Core.Validations;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -13,10 +14,17 @@ namespace TaskFlow.Api.Controllers
     public class ComentarioController : ControllerBase
     {
         private readonly IComentarioService _comentarioService;
+        private readonly ComentarioValidator _validator;
+        private readonly ComentarioPatchValidator _validatorPatch;
 
-        public ComentarioController(IComentarioService comentarioService)
+        public ComentarioController(IComentarioService comentarioService,
+            ComentarioValidator validator,
+            ComentarioPatchValidator validatorPatch
+        )
         {
             _comentarioService = comentarioService;
+            _validator = validator;
+            _validatorPatch = validatorPatch;
         }
 
         [HttpGet("mis-comentarios")]
@@ -64,6 +72,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PostComentario([FromBody] ComentarioWriteDto comentarioWriteDto)
         {
+            var validationResult = await _validator.ValidateAsync(comentarioWriteDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var comentario = await _comentarioService.PostComentarioAsync(
                 comentarioWriteDto.Contenido,
@@ -80,6 +98,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PatchComentario(int idComentario, [FromBody] ComentarioPatchDto comentarioPatchDto)
         {
+            var validationResult = await _validatorPatch.ValidateAsync(comentarioPatchDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+            
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var comentario = await _comentarioService.PatchComentarioAsync(
                 id,

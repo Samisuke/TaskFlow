@@ -4,6 +4,7 @@ using TaskFlow.Core.Dto.Proyecto;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using TaskFlow.Core.Validations;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -13,12 +14,21 @@ namespace TaskFlow.Api.Controllers
     public class ProyectoController : ControllerBase
     {
         private readonly IProyectoService _proyectoService;
+        private readonly ProyectoValidator _validator;
+        private readonly ProyectoPatchValidator _validatorPatch;
+        private readonly ProyectoPatchDueñoValidator _validatorDueño;
 
         public ProyectoController(
-            IProyectoService proyectoService
+            IProyectoService proyectoService,
+            ProyectoValidator validator,
+            ProyectoPatchValidator validatorPatch,
+            ProyectoPatchDueñoValidator validatorDueño
         )
         {
             _proyectoService = proyectoService;
+            _validator = validator;
+            _validatorPatch = validatorPatch;
+            _validatorDueño = validatorDueño;
         }
 
         // Obtener un solo proyecto por su ID.
@@ -71,6 +81,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PostProyecto([FromBody] ProyectoWriteDto proyectoDto)
         {
+            var validationResult = await _validator.ValidateAsync(proyectoDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var proyectoNuevo = await _proyectoService.PostProyectoAsync(
                 proyectoDto.Nombre,
@@ -89,6 +109,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult<ProyectoReadDto>> PatchProyecto(int idProyecto, [FromBody] ProyectoPatchDto proyectoDto)
         {
+            var validationResult = await _validatorPatch.ValidateAsync(proyectoDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cambios = await _proyectoService.PatchProyectoAsync(
                 id,
@@ -106,6 +136,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult<ProyectoReadDto>> TransferirPropiedadProyecto(int idProyecto, [FromBody] ProyectoPatchDueñoDto proyectoPatchDueñoDto)
         {
+            var validationResult = await _validatorDueño.ValidateAsync(proyectoPatchDueñoDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+    
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cambioPropietario = await _proyectoService.PatchDueñoProyectoAsync(
                 id,

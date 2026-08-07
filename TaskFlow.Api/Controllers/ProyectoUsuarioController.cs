@@ -4,6 +4,7 @@ using TaskFlow.Core.Dto.ProyectoUsuario;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using TaskFlow.Core.Validations;
 
 namespace TaskFlow.Api.Controllers
 {
@@ -13,10 +14,14 @@ namespace TaskFlow.Api.Controllers
     public class ProyectoUsuarioController : ControllerBase
     {
         private readonly IProyectoUsuarioService _pusuarioService;
+        private readonly ProyectoUsuarioValidator _validator;
 
-        public ProyectoUsuarioController(IProyectoUsuarioService pusuarioService)
+        public ProyectoUsuarioController(IProyectoUsuarioService pusuarioService,
+            ProyectoUsuarioValidator validator
+        )
         {
             _pusuarioService = pusuarioService;
+            _validator = validator;
         }
 
         [HttpGet("proyecto/{idProyecto}/usuario/{id}")]
@@ -43,6 +48,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PostProyectoUsuario([FromBody] ProyectoUsuarioWriteDto proyetoUsuarioWriteDto)
         {
+            var validationResult = await _validator.ValidateAsync(proyetoUsuarioWriteDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var miembroProyecto = await _pusuarioService.PostUsuarioAsync(
                 id,

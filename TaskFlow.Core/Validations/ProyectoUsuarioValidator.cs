@@ -8,13 +8,16 @@ namespace TaskFlow.Core.Validations
         public ProyectoUsuarioValidator()
         {
             RuleFor(x => x.UsuarioId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .GreaterThan(0)
+                .WithMessage("El usuario indicado no es válido.");
 
             RuleFor(x => x.ProyectoId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .GreaterThan(0)
+                .WithMessage("El usuario indicado no es válido.");
 
             RuleFor(x => x.Rol)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .IsInEnum()
+                .WithMessage("El rol indicado no es válido.");
         }
     }
 }

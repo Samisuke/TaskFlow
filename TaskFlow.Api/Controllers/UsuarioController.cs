@@ -4,7 +4,7 @@ using TaskFlow.Core.Dto.Usuario;
 using Mapster;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-
+using TaskFlow.Core.Validations;
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
@@ -13,10 +13,20 @@ namespace TaskFlow.Api.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
+        private readonly UsuarioValidator _validator;
+        private readonly UsuarioPatchValidator _validatorPatch;
+        private readonly UsuarioPatchPassValidator _validatorPass;
 
-        public UsuarioController(IUsuarioService usuarioService)
+        public UsuarioController(IUsuarioService usuarioService,
+            UsuarioValidator validator,
+            UsuarioPatchValidator validatorPatch,
+            UsuarioPatchPassValidator validatorPass
+        )
         {
             _usuarioService = usuarioService;
+            _validator = validator;
+            _validatorPass = validatorPass;
+            _validatorPatch = validatorPatch;
         }
 
         // Obtener un usuario por ID.
@@ -57,12 +67,21 @@ namespace TaskFlow.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> PostUsuario([FromBody] UsuarioWriteDto usuarioWriteDto)
         {
+            var validationResult = await _validator.ValidateAsync(usuarioWriteDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var usuario = await _usuarioService.PostUsuarioAsync(
                 usuarioWriteDto.Nombre,
                 usuarioWriteDto.Apellidos,
                 usuarioWriteDto.Email,
-                usuarioWriteDto.PasswordHash,
-                usuarioWriteDto.Activo
+                usuarioWriteDto.Password
             );
             if (!usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
 
@@ -75,6 +94,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult> PatchUsuario([FromBody] UsuarioPatchDto usuarioPatchDto)
         {
+            var validationResult = await _validatorPatch.ValidateAsync(usuarioPatchDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.PatchUsuarioAsync(
                 id,
@@ -94,6 +123,16 @@ namespace TaskFlow.Api.Controllers
         // Cambiar tu contraseña.
         public async Task<ActionResult> PatchPassUsuario([FromBody] UsuarioPassDto usuarioPassDto)
         {
+            var validationResult = await _validatorPass.ValidateAsync(usuarioPassDto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors.Select(e => new
+                {
+                    Campo = e.PropertyName,
+                    Error = e.ErrorMessage
+                }));
+            }
+
             var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.PatchUsuarioPassAsync(
                 id,

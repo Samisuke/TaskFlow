@@ -4,6 +4,7 @@ using TaskFlow.Api.Config.MapsterConfig;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FluentValidation;
 
 using TaskFlow.Infrastructure.Services;
 using TaskFlow.Infrastructure.Repositories;
@@ -11,6 +12,8 @@ using TaskFlow.Core.Services;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services.Token;
 using TaskFlow.Infrastructure.Services.Token;
+using TaskFlow.Core.Validations;
+using TaskFlow.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,9 +80,16 @@ builder.Services.AddAuthentication(config =>
     };
 });
 
+// Validations
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioValidator>();
+
+// Builders del Middleware
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+
+
 var app = builder.Build();
-
-
 
 if (app.Environment.IsDevelopment())
 {

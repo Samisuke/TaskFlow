@@ -12,11 +12,9 @@ namespace TaskFlow.Core.Validations
                 .MaximumLength(500).WithMessage("El comentario no peude tener más de quinientos caracteres.")
                 .NotEmpty().WithMessage("Este campo no puede estar vacío.");
 
-            RuleFor(x => x.UsuarioId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
-
             RuleFor(x => x.TareaId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .GreaterThan(0)
+                .WithMessage("El usuario indicado no es válido.");
         }
     }
 

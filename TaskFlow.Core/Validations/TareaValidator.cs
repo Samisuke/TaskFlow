@@ -17,21 +17,24 @@ namespace TaskFlow.Core.Validations
                 .MaximumLength(300).WithMessage("La descripción no puede tener más de trescientos caracteres.");
 
             RuleFor(x => x.Estado)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .IsInEnum()
+                .WithMessage("El estado indicado no es válido.");
 
             RuleFor(x => x.Prioridad)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .IsInEnum()
+                .WithMessage("La prioridad indicada no es válido.");
 
             RuleFor(x => x.FechaLimite)
-                .GreaterThan(DateTimeOffset.UtcNow).WithMessage("La fecha debe ser en el pasado.")
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.")
+                .GreaterThan(DateTimeOffset.UtcNow).WithMessage("La fecha debe ser en el futuro.")
                 .NotEmpty().WithMessage("Este campo no puede estar vacío.");
 
             RuleFor(x => x.ProyectoId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .GreaterThan(0)
+                .WithMessage("El usuario indicado no es válido.");
 
             RuleFor(x => x.AsignadoId)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .GreaterThan(0)
+                .WithMessage("El usuario indicado no es válido.");
         }
     }
 
@@ -50,7 +53,7 @@ namespace TaskFlow.Core.Validations
                 .When(x => x.Descripcion != null);
 
             RuleFor(x => x.FechaLimite)
-                .GreaterThan(DateTimeOffset.UtcNow).WithMessage("La fecha debe ser en el pasado.")
+                .GreaterThan(DateTimeOffset.UtcNow).WithMessage("La fecha debe ser en el futuro.")
                 .When(x => x.FechaLimite != null);
         }
     }
@@ -59,11 +62,9 @@ namespace TaskFlow.Core.Validations
     {
         public TareaEstadoPatchValidator()
         {
-            RuleFor(x => x.IdTarea)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
-
             RuleFor(x => x.Estado)
-                .NotEmpty().WithMessage("Este campo no puede estar vacío.");
+                .IsInEnum()
+                .WithMessage("El estado indicado no es válido.");
         }
     }
 }

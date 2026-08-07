@@ -22,7 +22,7 @@ namespace TaskFlow.Core.Validations
                 .EmailAddress().WithMessage("El formato del correo no es válido.")
                 .NotEmpty().WithMessage("Este campo no puede estar vacío.");
 
-            RuleFor(x => x.PasswordHash)
+            RuleFor(x => x.Password)
                 .MinimumLength(6).WithMessage("La contraseña tiene que tener al menos 6 caracteres")
                 .MaximumLength(100).WithMessage("La contraseña no puede tener más de 100 caracteres")
                 .Matches(@"[A-Z]").WithMessage("La contraseña debe tener al menos una letra mayúscula.")

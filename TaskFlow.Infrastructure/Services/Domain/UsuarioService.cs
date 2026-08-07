@@ -52,8 +52,7 @@ namespace TaskFlow.Infrastructure.Services
             string nombreUsuario,
             string apellidosUsuario,
             string emailUsuario,
-            string passUsuario,
-            bool activoUsuario
+            string passUsuario
         )
         {   
             // Crear usuario.
@@ -64,7 +63,7 @@ namespace TaskFlow.Infrastructure.Services
                 Email = emailUsuario,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(passUsuario),
                 FechaRegistro = DateTime.UtcNow,
-                Activo = activoUsuario
+                Activo = true
             };
 
             // Base de datos.

@@ -16,8 +16,7 @@ namespace TaskFlow.Core.Services
             string nombreUsuario,
             string apellidosUsuario,
             string emailUsuario,
-            string passUsuario,
-            bool Activo
+            string passUsuario
         );
 
         // Métodos PATCH
