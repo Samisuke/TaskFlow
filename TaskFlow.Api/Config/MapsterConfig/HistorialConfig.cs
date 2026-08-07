@@ -1,6 +1,6 @@
 using Mapster;
 using TaskFlow.Core.Models;
-using TaskFlow.Api.Dto.Historial;
+using TaskFlow.Core.Dto.Historial;
 
 namespace TaskFlow.Api.Config.MapsterConfig
 {

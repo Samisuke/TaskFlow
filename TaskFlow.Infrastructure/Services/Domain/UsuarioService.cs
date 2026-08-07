@@ -2,7 +2,6 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Models;
-using BCrypt;
 
 namespace TaskFlow.Infrastructure.Services
 {

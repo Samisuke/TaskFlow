@@ -1,6 +1,6 @@
 using Mapster;
 using TaskFlow.Core.Models;
-using TaskFlow.Api.Dto.ProyectoUsuario;
+using TaskFlow.Core.Dto.ProyectoUsuario;
 
 namespace TaskFlow.Api.Config.MapsterConfig
 {

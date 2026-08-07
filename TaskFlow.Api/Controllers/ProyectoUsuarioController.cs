@@ -1,6 +1,6 @@
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Api.Dto.ProyectoUsuario;
+using TaskFlow.Core.Dto.ProyectoUsuario;
 using TaskFlow.Core.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
