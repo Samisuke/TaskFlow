@@ -4,12 +4,14 @@ using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Requests;
+using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Services
 {
     public class TareaService : ITareaService
     {
         // Inyección de repositorios
+        private readonly TaskFlowDbContext _context;
         private readonly ITareaRepository _repoTarea;
         private readonly ITareaEtiquetaService _tareaEtiquetaService;
         private readonly ITareaPermissionService _tareaPermissions;
@@ -19,13 +21,15 @@ namespace TaskFlow.Infrastructure.Services
             ITareaRepository repoTarea,
             ITareaEtiquetaService TareaEtiquetaService,
             ITareaPermissionService tareaPermissions,
-            IHistorialService historialService
+            IHistorialService historialService,
+            TaskFlowDbContext context
         )
         {
             _repoTarea = repoTarea;
             _tareaEtiquetaService = TareaEtiquetaService;
             _tareaPermissions = tareaPermissions;
             _historialService = historialService;
+            _context = context;
         }
 
         // Métodos GET
@@ -82,38 +86,52 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones.
             if (!await _tareaPermissions.PuedePublicarTareasAsync(proyectoId, propiaId)) return Result<Tarea>.Mal("No se ha encontrado una tarea.");
 
-            // Creacion de tarea.
-            var tarea = new Tarea
+            // Creación de transacción.
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                Titulo = tituloTarea,
-                Descripcion = descripcionTarea,
-                Estado = estadoTareaTarea,
-                Prioridad = prioridadTareaTarea,
-                FechaCreacion = DateTime.UtcNow,
-                FechaLimite = fechaLimiteTarea,
-                ProyectoId = proyectoId,
-                AsignadoId = asignadoId,
-                CreadorId = propiaId
-            };
+                // Creación de tarea.
+                var tarea = new Tarea
+                {
+                    Titulo = tituloTarea,
+                    Descripcion = descripcionTarea,
+                    Estado = estadoTareaTarea,
+                    Prioridad = prioridadTareaTarea,
+                    FechaCreacion = DateTime.UtcNow,
+                    FechaLimite = fechaLimiteTarea,
+                    ProyectoId = proyectoId,
+                    AsignadoId = asignadoId,
+                    CreadorId = propiaId
+                };
+                await _repoTarea.CrearTareaAsync(tarea);
 
-            // Base de datos.
-            await _repoTarea.CrearTareaAsync(tarea);
-            var guardadoExistoso = await _repoTarea.GuardarCambiosAsync();
-            if (!guardadoExistoso) return Result<Tarea>.Mal("Fallo inesperado al guardar la tarea. Inténtalo de nuevo más tarde.");
+                // Procesamos las etiquetas.
+                if (etiquetas.Count > 0)
+                {
+                    var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
+                    if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
 
-            // Procesamos las etiquetas
-            if (etiquetas.Count != 0)
-            {
-                var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
-                if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
+                    var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
+                    if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+                }
+                await _historialService.RegistrarTareaAsync(tarea);
 
-                var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
-                if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+                // Base de datos.
+                await _context.SaveChangesAsync();
+
+                // Commit de la transacción.
+                await transaction.CommitAsync();
+
+                return Result<Tarea>.Bien(tarea);
             }
 
-            await _historialService.RegistrarTareaAsync(tarea);
-
-            return Result<Tarea>.Bien(tarea);
+            catch
+            {   
+                // Si algo falla ROLLBACK
+                await transaction.RollbackAsync();
+                throw;
+            }   
         }
 
         // Métodos PATCH

@@ -56,10 +56,7 @@ namespace TaskFlow.Infrastructure.Services
                 }
             }
 
-            // Guardamos los cambios
-            var guardadoExitosoEtiqueta = await _repoEtiqueta.GuardarCambiosAsync();
-            if (!guardadoExitosoEtiqueta) return Result.Mal("Fallo inesperado al guardar la etiqueta. Inténtalo de nuevo más tarde.");
-
+            // Return sin guardar cambios porque el servicio lo guarda todo mediante la transacción
             return Result.Bien();   
         }
 
@@ -87,9 +84,7 @@ namespace TaskFlow.Infrastructure.Services
                 });          
             }
 
-            var guardadoExitoso = await _repoTareaEtiqueta.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-
+            // Return sin guardar cambios porque el servicio lo guarda todo mediante la transacción
             return Result.Bien();       
         }
     }
