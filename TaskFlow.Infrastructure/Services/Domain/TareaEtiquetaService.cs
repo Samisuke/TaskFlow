@@ -23,9 +23,9 @@ namespace TaskFlow.Infrastructure.Services
         
         // Métodos GET
         // Obtener todas las etiquetas de una tarea. Útil para mostrarlas junto a las tareas.
-        public async Task<Result<IEnumerable<TareaEtiqueta>>> GetEtiquetasDeUnaTareaAsync(int idTarea)
+        public async Task<Result<IEnumerable<TareaEtiqueta>>> GetEtiquetasDeUnaTareaAsync(int tareaId)
         {
-            var etiquetas = await _repoTareaEtiqueta.ObtenerEtiquetasDeUnaTareaAsync(idTarea);
+            var etiquetas = await _repoTareaEtiqueta.ObtenerEtiquetasDeUnaTareaAsync(tareaId);
             if (!etiquetas.Any()) return Result<IEnumerable<TareaEtiqueta>>.Mal("La tarea no tiene etiquetas.");
 
             return Result<IEnumerable<TareaEtiqueta>>.Bien(etiquetas);
@@ -37,18 +37,18 @@ namespace TaskFlow.Infrastructure.Services
         public async Task<Result> ComprobarSiEtiquetaExisteOCrearASync(IEnumerable<NuevaEtiqueta> etiquetas)
         {
             // Comprobamos cada elemento de la lista
-            foreach (var NuevaEtiqueta in etiquetas)
+            foreach (var nuevaEtiqueta in etiquetas)
             {
                 // Comprobación: La etiqueta tiene que existir.
-                var etiqueta = await _repoEtiqueta.ObtenerEtiquetaPorNombreYColorAsync(NuevaEtiqueta.Nombre, NuevaEtiqueta.Color);
+                var etiqueta = await _repoEtiqueta.ObtenerEtiquetaPorNombreYColorAsync(nuevaEtiqueta.Nombre, nuevaEtiqueta.Color);
                 
                 // Si no existe, la creamos.
                 if (etiqueta is null)
                 {     
                     etiqueta = new Etiqueta
                     {
-                        Nombre = NuevaEtiqueta.Nombre,
-                        Color = NuevaEtiqueta.Color
+                        Nombre = nuevaEtiqueta.Nombre,
+                        Color = nuevaEtiqueta.Color
                     };
 
                     // La metemos en la base de datos.
@@ -63,7 +63,8 @@ namespace TaskFlow.Infrastructure.Services
             return Result.Bien();   
         }
 
-        // Asignar etiquetas a una tarea concreta
+        // Asignar etiquetas a una tarea concreta. Separado de la comprobación para mantener
+        // las responsabilidades separadas y construir métodos escalables.
         public async Task<Result> AsignarEtiquetaATareaASync(
             Tarea tarea,
             IEnumerable<NuevaEtiqueta> etiquetas
@@ -88,9 +89,8 @@ namespace TaskFlow.Infrastructure.Services
 
             var guardadoExitoso = await _repoTareaEtiqueta.GuardarCambiosAsync();
             if (!guardadoExitoso) return Result.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+
             return Result.Bien();       
         }
-
-        
     }
 }

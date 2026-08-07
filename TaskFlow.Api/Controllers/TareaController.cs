@@ -6,6 +6,25 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using TaskFlow.Core.Validations;
 
+// Notas para un posible reclutador:
+//
+// Controlador encargado de gestionar las tareas.
+//
+// Funcionalidades:
+//  - Obtener las tareas pertenecientes a un proyecto.
+//  - Obtener las tareas pendientes del usuario autenticado.
+//  - Obtener las tareas creadas por el usuario autenticado.
+//  - Obtener una tarea mediante su ID.
+//  - Crear una tarea dentro de un proyecto, incluyendo sus posibles etiquetas.
+//  - Modificar la información básica de una tarea.
+//  - Modificar el estado de una tarea mediante un endpoint independiente.
+//
+// La modificación del estado se mantiene separada de la modificación general
+// de la tarea debido a que tiene unas reglas de permisos diferentes.
+//
+// La identidad del usuario se obtiene mediante JWT y las comprobaciones de
+// pertenencia y permisos se delegan en los servicios correspondientes.
+
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
@@ -13,11 +32,13 @@ namespace TaskFlow.Api.Controllers
 
     public class TareaController : ControllerBase
     {
+        // Inyección de servicio y validadores.
         private readonly ITareaService _tareaService;
         private readonly TareaValidator _validator;
         private readonly TareaPatchValidator _validatorPatch;
         private readonly TareaEstadoPatchValidator _validatorEstado;
-        public TareaController(ITareaService tareaService,
+        public TareaController(
+            ITareaService tareaService,
             TareaValidator validator,
             TareaPatchValidator validatorPatch,
             TareaEstadoPatchValidator validatorEstado
@@ -29,48 +50,53 @@ namespace TaskFlow.Api.Controllers
             _validatorEstado = validatorEstado;
         }
 
-        [HttpGet("proyecto/{idProyecto}/tareas")]
+        // Obtener las tareas pertenecientes a un proyecto.
+        [HttpGet("proyecto/{proyectoId}/tareas")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasProyecto(int idProyecto)
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasProyecto(int proyectoId)
         {
-            var tareas = await _tareaService.GetTareasDeUnProyectoAsync(idProyecto);
-            if(!tareas.EsCorrecto || tareas.Valor is null) return BadRequest(tareas.MensajeError);
+            var tareas = await _tareaService.GetTareasDeUnProyectoAsync(proyectoId);
+            if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
 
             return Ok(tareas.Valor.Adapt<TareaReadDto>()); 
         }
 
-        [HttpGet("mis-tareas")]
+        // Obtener las tareas pendientes propias.
+        [HttpGet("mis-tareas-pendientes")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasPendientes()
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetMisTareasPendientes()
         {
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var tareas = await _tareaService.GetTareasPendientesDeUsuarioAsync(id);
-            if(!tareas.EsCorrecto || tareas.Valor is null) return BadRequest(tareas.MensajeError);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var tareas = await _tareaService.GetTareasPendientesDeUsuarioAsync(idJWT);
+            if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
+
+            return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
+        }
+        
+        // Obtener las tareas asignadas propias.
+        [HttpGet("mis-tareas-asignadas")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetMisTareasAsignadas() 
+        {
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var tareas = await _tareaService.GetTareasDadasDeUsuarioAsync(idJWT);
+            if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
 
             return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
         }
 
-        [HttpGet("tareas-asignadas")]
+        // Obtener una tarea por su ID.
+        [HttpGet("{tareaId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasAsignadas() 
+        public async Task<ActionResult<TareaReadDto>> GetTarea(int tareaId)
         {
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var tareas = await _tareaService.GetTareasDadasDeUsuarioAsync(id);
-            if(!tareas.EsCorrecto || tareas.Valor is null) return BadRequest(tareas.MensajeError);
+            var tarea = await _tareaService.GetTareaPorIdAsync(tareaId);
+            if(!tarea.EsCorrecto || tarea.Valor is null) return NotFound(tarea.MensajeError);
 
-            return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
+            return Ok(tarea.Valor.Adapt<TareaReadDto>());
         }
 
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<TareaReadDto>> GetTarea(int id)
-        {
-            var tarea = await _tareaService.GetTareaPorIdAsync(id);
-            if(!tarea.EsCorrecto || tarea.Valor is null) return BadRequest(tarea.MensajeError);
-
-            return Ok(tarea.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
-        }
-
+        // Crear una tarea contigo como creador.
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> PostTarea([FromBody] TareaWriteDto tareaWriteDto)
@@ -85,9 +111,9 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PostTareaAsync(
-                id,
+                idJWT,
                 tareaWriteDto.Titulo,
                 tareaWriteDto.Descripcion,
                 tareaWriteDto.Estado,
@@ -103,9 +129,10 @@ namespace TaskFlow.Api.Controllers
             return CreatedAtAction(nameof(GetTarea), new {id = tareaDto.Id}, tareaDto);
         }
 
-        [HttpPatch("{idTarea}")]
+        // Modificar una tarea.
+        [HttpPatch("{tareaId}")]
         [Authorize]
-        public async Task<ActionResult> PatchTarea(int idTarea, [FromBody] TareaPatchDto tareaPatchDto)
+        public async Task<ActionResult> PatchTarea(int tareaId, [FromBody] TareaPatchDto tareaPatchDto)
         {
             var validationResult = await _validatorPatch.ValidateAsync(tareaPatchDto);
             if (!validationResult.IsValid)
@@ -117,15 +144,15 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PatchTareaAsync(
-                id,
-                idTarea,
+                idJWT,
+                tareaId,
                 tareaPatchDto.Titulo,
                 tareaPatchDto.Descripcion,
                 tareaPatchDto.Prioridad,
                 tareaPatchDto.FechaLimite,
-                tareaPatchDto.Etiquetas
+                tareaPatchDto.Etiquetas!
             );
             if (!tarea.EsCorrecto || tarea.Valor is null) return BadRequest(tarea.MensajeError);
 
@@ -133,9 +160,10 @@ namespace TaskFlow.Api.Controllers
             return Ok(tareaDto);
         }
 
-        [HttpPatch("{idTarea}/estado")]
+        // Modificar el estado de una tarea.
+        [HttpPatch("{tareaId}/estado")]
         [Authorize]
-        public async Task<ActionResult> PatchEstadoTarea(int idTarea, [FromBody] TareaEstadoPatchDto tareaPatchDto)
+        public async Task<ActionResult> PatchEstadoTarea(int tareaId, [FromBody] TareaEstadoPatchDto tareaPatchDto)
         {
             var validationResult = await _validatorEstado.ValidateAsync(tareaPatchDto);
             if (!validationResult.IsValid)
@@ -147,10 +175,10 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var tarea = await _tareaService.PatchEstadoTareaAsync(
-                id,
-                idTarea,
+                idJWT,
+                tareaId,
                 tareaPatchDto.Estado
             );
             if (!tarea.EsCorrecto || tarea.Valor is null) return BadRequest(tarea.MensajeError);

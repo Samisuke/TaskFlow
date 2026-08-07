@@ -1,5 +1,7 @@
 using TaskFlow.Core.Models;
 
+// Define las comprobaciones de permisos necesarias para operar sobre tareas.
+
 namespace TaskFlow.Core.Services
 {
     public interface ITareaPermissionService

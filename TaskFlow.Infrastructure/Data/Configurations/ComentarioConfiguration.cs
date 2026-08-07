@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskFlow.Core.Models;
 
+// Configuración de Entity Framework Core para la entidad Comentario.
+// Define las restricciones, relaciones y propiedades de la tabla Comentario.
+
 namespace TaskFlow.Infrastructure.Data.Configurations;
 
 public class ComentarioConfiguration : IEntityTypeConfiguration<Comentario>

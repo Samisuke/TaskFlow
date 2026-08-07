@@ -18,7 +18,7 @@ namespace TaskFlow.Infrastructure.Services
         // Comprueba que pertenezcas al proyecto, estés activo y seas el dueño de un comentario
         public async Task<bool> PuedeCambiarComentarioAsync(int idPropia, Comentario comentario)
         {
-            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(comentario.Tarea.ProyectoId, idPropia);
+            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(comentario.Tarea!.ProyectoId, idPropia);
 
             return proyectoUsuario is not null
             && proyectoUsuario.Activo

@@ -6,6 +6,28 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using TaskFlow.Core.Validations;
 
+// Notas para un posible reclutador:
+//
+// Controlador encargado de gestionar los proyectos.
+//
+// Funcionalidades:
+//  - Obtener un proyecto por su ID.
+//  - Obtener los proyectos a los que pertenece un usuario.
+//  - Obtener los proyectos creados por un usuario.
+//  - Obtener los proyectos del usuario autenticado mediante su JWT.
+//  - Crear un proyecto utilizando automáticamente el usuario autenticado como propietario.
+//  - Modificar la información básica de un proyecto, comprobando los permisos correspondientes.
+//  - Transferir la propiedad de un proyecto, realizando las comprobaciones de negocio necesarias.
+//
+// El controlador se encarga de recibir las peticiones, validar los datos de entrada
+// y delegar la lógica de negocio en los servicios correspondientes.
+//
+// Los permisos y reglas de negocio se gestionan fuera del controlador para mantener
+// separadas las responsabilidades.
+//
+// Este controlador existe porque los proyectos son una funcionalidad principal de TaskFlow,
+// permitiendo a los usuarios crearlos, consultarlos, modificarlos y participar en ellos.
+
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
@@ -13,6 +35,7 @@ namespace TaskFlow.Api.Controllers
 
     public class ProyectoController : ControllerBase
     {
+        // Inyección de servicio y validadores.
         private readonly IProyectoService _proyectoService;
         private readonly ProyectoValidator _validator;
         private readonly ProyectoPatchValidator _validatorPatch;
@@ -32,11 +55,11 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Obtener un solo proyecto por su ID.
-        [HttpGet("{id}")]
+        [HttpGet("{proyectoId}")]
         [Authorize]
-        public async Task<ActionResult<ProyectoReadDto>> GetProyecto(int id)
+        public async Task<ActionResult<ProyectoReadDto>> GetProyecto(int proyectoId)
         {
-            var proyecto = await _proyectoService.GetProyectoPorIdAsync(id);
+            var proyecto = await _proyectoService.GetProyectoPorIdAsync(proyectoId);
             if (!proyecto.EsCorrecto || proyecto.Valor is null) return NotFound(proyecto.MensajeError);
 
             return Ok(proyecto.Valor.Adapt<ProyectoReadDto>());  
@@ -65,12 +88,12 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Obtener los proyectos propios.
-        [HttpGet]
+        [HttpGet("mis-proyectos")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosPropios()
         {
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var proyectos = await _proyectoService.GetProyectosDeUnaPersonaAsync(id);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var proyectos = await _proyectoService.GetProyectosDeUnaPersonaAsync(idJWT);
             if (!proyectos.EsCorrecto || proyectos.Valor is null) return NotFound(proyectos.MensajeError);
 
             return Ok(proyectos.Valor.Adapt<IEnumerable<ProyectoReadDto>>());
@@ -91,13 +114,12 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var proyectoNuevo = await _proyectoService.PostProyectoAsync(
                 proyectoDto.Nombre,
                 proyectoDto.Descripcion,
-                id
+                idJWT
             );
-
             if (!proyectoNuevo.EsCorrecto || proyectoNuevo.Valor is null) return BadRequest(proyectoNuevo.MensajeError);
 
             var proyectoNuevoDto = proyectoNuevo.Valor.Adapt<ProyectoReadDto>();
@@ -105,9 +127,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Modificar un proyecto
-        [HttpPatch("{idProyecto}")]
+        [HttpPatch("{proyectoId}")]
         [Authorize]
-        public async Task<ActionResult<ProyectoReadDto>> PatchProyecto(int idProyecto, [FromBody] ProyectoPatchDto proyectoDto)
+        public async Task<ActionResult<ProyectoReadDto>> PatchProyecto(int proyectoId, [FromBody] ProyectoPatchDto proyectoDto)
         {
             var validationResult = await _validatorPatch.ValidateAsync(proyectoDto);
             if (!validationResult.IsValid)
@@ -119,10 +141,10 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cambios = await _proyectoService.PatchProyectoAsync(
-                id,
-                idProyecto,
+                idJWT,
+                proyectoId,
                 proyectoDto.Nombre,
                 proyectoDto.Descripcion
             );
@@ -132,9 +154,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Cambiar propietario de un proyecto
-        [HttpPatch("{idProyecto}/owner")]
+        [HttpPatch("cambio-propietario/{proyectoId}")]
         [Authorize]
-        public async Task<ActionResult<ProyectoReadDto>> TransferirPropiedadProyecto(int idProyecto, [FromBody] ProyectoPatchDueñoDto proyectoPatchDueñoDto)
+        public async Task<ActionResult<ProyectoReadDto>> TransferirPropiedadProyecto(int proyectoId, [FromBody] ProyectoPatchDueñoDto proyectoPatchDueñoDto)
         {
             var validationResult = await _validatorDueño.ValidateAsync(proyectoPatchDueñoDto);
             if (!validationResult.IsValid)
@@ -146,10 +168,10 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
     
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var cambioPropietario = await _proyectoService.PatchDueñoProyectoAsync(
-                id,
-                idProyecto,
+                idJWT,
+                proyectoId,
                 proyectoPatchDueñoDto.NuevoPropietarioId
             );
             if (!cambioPropietario.EsCorrecto || cambioPropietario.Valor is null) return BadRequest(cambioPropietario.MensajeError);

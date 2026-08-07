@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskFlow.Core.Models;
 
+// Configuración de Entity Framework Core para la relación entre Proyecto y Usuario.
+// Define las claves, restricciones y relaciones de la tabla intermedia.
+
 namespace TaskFlow.Infrastructure.Data.Configurations;
 
 public class ProyectoUsuarioConfiguration : IEntityTypeConfiguration<ProyectoUsuario>

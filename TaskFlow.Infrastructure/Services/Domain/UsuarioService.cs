@@ -11,7 +11,10 @@ namespace TaskFlow.Infrastructure.Services
         private readonly IUsuarioRepository _repoUsuario;
         private readonly IPassPermissionService _passPermission;
 
-        public UsuarioService(IUsuarioRepository repoUsuario, IPassPermissionService passPermission)
+        public UsuarioService(
+            IUsuarioRepository repoUsuario,
+            IPassPermissionService passPermission
+        )
         {
             _repoUsuario = repoUsuario;
             _passPermission = passPermission;
@@ -32,7 +35,7 @@ namespace TaskFlow.Infrastructure.Services
         {
             
             var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
-            if (usuario is null) return Result<Usuario>.Mal("ERROR. No se encuentra el usuario.");
+            if (usuario is null) return Result<Usuario>.Mal("No se encuentra el usuario.");
 
             return Result<Usuario>.Bien(usuario);
         }
@@ -41,7 +44,7 @@ namespace TaskFlow.Infrastructure.Services
         public async Task<Result<Usuario>> GetUsuarioPorEmailAsync(string emailUsuario)
         {
             var usuario = await _repoUsuario.ObtenerUsuarioPorEmailAsync(emailUsuario);
-            if (usuario is null) return Result<Usuario>.Mal("Error. No se encuentra el usuario.");
+            if (usuario is null) return Result<Usuario>.Mal("No se encuentra el usuario.");
 
             return Result<Usuario>.Bien(usuario);
         }
@@ -69,15 +72,15 @@ namespace TaskFlow.Infrastructure.Services
             // Base de datos.
             await _repoUsuario.CrearUnUsuarioNuevoAsync(usuario);
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
+            if (!guardadoExitoso) return Result<Usuario>.Mal("Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
             
             return Result<Usuario>.Bien(usuario);
         }
 
         // Métodos PATCH
-        // Modificar un usuario.
+        // Modificar tu perfil de usuario. No permite cambiar la contraseña.
         public async Task<Result<Usuario>> PatchUsuarioAsync(
-            int idUsuario,
+            int usuarioId,
             string? nombreUsuario,
             string? apellidosUsuario,
             string? emailUsuario,
@@ -85,7 +88,7 @@ namespace TaskFlow.Infrastructure.Services
         )
         {
             int numeroCambios = 0;
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
+            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(usuarioId);
             if (usuario is null) return Result<Usuario>.Mal("No se encuentra el usuario.");
 
             // Realizar cambios
@@ -102,7 +105,7 @@ namespace TaskFlow.Infrastructure.Services
             if (emailUsuario is not null)
             {
                 var correoRepetido = await _repoUsuario.ObtenerUsuarioPorEmailAsync(emailUsuario);
-                if (correoRepetido is not null) return Result<Usuario>.Mal("ERROR. El email ya está registrado, prueba otro.");
+                if (correoRepetido is not null) return Result<Usuario>.Mal("El email ya está registrado, prueba otro.");
                 if(emailUsuario is not null) usuario.Email = emailUsuario;
                 numeroCambios += 1;
             } 
@@ -113,17 +116,18 @@ namespace TaskFlow.Infrastructure.Services
             } 
 
             // Base de datos
-            if (numeroCambios == 0) return Result<Usuario>.Mal("ERROR. No se han detectado cambios.");
+            if (numeroCambios == 0) return Result<Usuario>.Mal("No se han detectado cambios.");
             var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Usuario>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+            if (!guardadoExitoso) return Result<Usuario>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
             
             return Result<Usuario>.Bien(usuario);
         }
 
-        public async Task<Result<Usuario>> PatchUsuarioPassAsync(int idUsuario, string passNueva, string passAntigua)
+        // Modificar la contraseña. Separado del patch normal por seguridad.
+        public async Task<Result<Usuario>> PatchUsuarioPassAsync(int usuarioId, string passNueva, string passAntigua)
         {
 
-            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(idUsuario);
+            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(usuarioId);
             if (usuario is null) return Result<Usuario>.Mal("Usuario no encontrado.");
             
             

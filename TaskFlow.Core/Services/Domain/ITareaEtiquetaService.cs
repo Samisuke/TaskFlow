@@ -2,6 +2,8 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Requests;
 
+// Define la lógica de negocio relacionada con la asignación de etiquetas a las tareas.
+
 namespace TaskFlow.Core.Services
 {
     public interface ITareaEtiquetaService

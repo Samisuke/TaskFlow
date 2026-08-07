@@ -1,6 +1,8 @@
 using FluentValidation;
 using TaskFlow.Core.Dto.Tarea;
 
+// Validaciones relacionadas con las tareas, tanto creación como edición.
+
 namespace TaskFlow.Core.Validations
 {
     public class TareaValidator : AbstractValidator<TareaWriteDto>

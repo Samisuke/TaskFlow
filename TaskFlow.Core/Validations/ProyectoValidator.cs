@@ -1,6 +1,8 @@
 using FluentValidation;
 using TaskFlow.Core.Dto.Proyecto;
 
+// Validaciones relacionadas con los proyectos, tanto creación como edición.
+
 namespace TaskFlow.Core.Validations
 {
     public class ProyectoValidator : AbstractValidator<ProyectoWriteDto>

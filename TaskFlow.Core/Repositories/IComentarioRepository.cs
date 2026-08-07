@@ -1,5 +1,7 @@
 using TaskFlow.Core.Models;
 
+// Define las operaciones de acceso y persistencia de datos relacionadas con los comentarios.
+
 namespace TaskFlow.Core.Repositories
 {
     public interface IComentarioRepository

@@ -1,3 +1,6 @@
+// Con HistorialActions podemos modificar el texto que crea el historial desde aquí, sin tener que estar yendo a diferentes servicios a cambiarlo.
+// Decidí centralizarlo por comodidad y escalabilidad.
+
 namespace TaskFlow.Core.Requests
 {
     public class HistorialActions

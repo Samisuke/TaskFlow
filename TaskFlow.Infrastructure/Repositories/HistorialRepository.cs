@@ -17,10 +17,12 @@ namespace TaskFlow.Infrastructure.Repositories
 
         // Métodos GET
         // Ver el historial completo.
-        public async Task <IEnumerable<Historial>> ObtenerHistorialDeUnaTareaAsync(int idTarea)
+        public async Task <IEnumerable<Historial>> ObtenerHistorialAsync(int idProyecto)
         {
             return await _context.Historiales
                 .Include(h => h.Usuario)
+                .Include(h => h.Proyecto)
+                .Where(h => h.ProyectoId == idProyecto)
                 .ToListAsync();
         }
 

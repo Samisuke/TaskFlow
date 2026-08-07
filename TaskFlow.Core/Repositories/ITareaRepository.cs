@@ -1,5 +1,7 @@
 using TaskFlow.Core.Models;
 
+// Define las operaciones de acceso y persistencia de datos relacionadas con las tareas.
+
 namespace TaskFlow.Core.Repositories
 {
     public interface ITareaRepository

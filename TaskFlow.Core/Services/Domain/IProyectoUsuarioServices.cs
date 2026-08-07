@@ -2,6 +2,8 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Enums;
 using TaskFlow.Core.Models;
 
+// Define la lógica de negocio relacionada con la pertenencia de usuarios a proyectos.
+
 namespace TaskFlow.Core.Services
 {
     public interface IProyectoUsuarioService

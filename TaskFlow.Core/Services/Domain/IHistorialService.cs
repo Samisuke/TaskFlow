@@ -1,12 +1,14 @@
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 
+// Define las operaciones necesarias para registrar y consultar el historial de cambios de los proyectos.
+
 namespace TaskFlow.Core.Services
 {
-    public interface IHIstorialService
+    public interface IHistorialService
     {
         // Métodos GET
-        Task<Result<IEnumerable<Historial>>> GetHistorialDeUnaTareaAsync(int idTarea);
+        Task<Result<IEnumerable<Historial>>> GetHistorialAsync(int idTarea);
 
         // Registrar un comentario
         Task RegistrarComentarioAsync(Comentario comentario, int idPropia);

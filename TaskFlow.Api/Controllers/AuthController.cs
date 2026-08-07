@@ -4,18 +4,26 @@ using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services.Token;
 using TaskFlow.Core.Validations;
 
+// Notas para un posible reclutador:
+// Controlador de LogIn.
+// Misión: Un usuario debe poder registrarse en la aplicación para poder interactuar con ella. Este Controller cuenta con
+// validación para comprobar que envías las credenciales, comprueba que sean correctas y que no estés 
+// inactivo. Si una falla, devuelve un mensaje de error personalizado. En caso de ser correcto, crea y te devuelve un token JWT.
+
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-
+    
     public class AuthController : ControllerBase
     {
+        // Inyección de servicio y validadores.
         private readonly ITokenService _tokenService;
         private readonly IUsuarioRepository _repoUsuario;
         private readonly LoginValidator _validator;
 
-        public AuthController(ITokenService tokenService,
+        public AuthController(
+            ITokenService tokenService,
             IUsuarioRepository repoUsuario,
             LoginValidator validator
         )

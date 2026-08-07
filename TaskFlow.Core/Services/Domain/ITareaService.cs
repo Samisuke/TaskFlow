@@ -3,6 +3,8 @@ using TaskFlow.Core.Models;
 using TaskFlow.Core.Enums;
 using TaskFlow.Core.Requests;
 
+// Define la lógica de negocio relacionada con las tareas.
+
 namespace TaskFlow.Core.Services
 {
     public interface ITareaService

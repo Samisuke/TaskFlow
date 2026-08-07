@@ -1,5 +1,7 @@
 using TaskFlow.Core.Models;
 
+// Define las comprobaciones de permisos necesarias para operar sobre proyectos.
+
 namespace TaskFlow.Core.Services
 {
     public interface IProyectoPermissionService

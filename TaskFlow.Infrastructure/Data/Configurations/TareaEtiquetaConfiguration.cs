@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskFlow.Core.Models;
 
+// Configuración de Entity Framework Core para la relación entre Tarea y Etiqueta.
+// Define las claves, restricciones y relaciones de la tabla intermedia.
+
 namespace TaskFlow.Infrastructure.Data.Configurations;
 
 public class TareaEtiquetaConfiguration : IEntityTypeConfiguration<TareaEtiqueta>

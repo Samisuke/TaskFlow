@@ -6,7 +6,7 @@ using TaskFlow.Core.Requests;
 
 namespace TaskFlow.Infrastructure.Services
 {
-    public class HistorialService : IHIstorialService
+    public class HistorialService : IHistorialService
     {
         // Inyección del repositorio
         private readonly IHistorialRepository _repoHistorial;
@@ -18,9 +18,9 @@ namespace TaskFlow.Infrastructure.Services
 
         // Peticiones GET
         // Obtener el historial. Útil para mostrar el historial de cambios que ha sufrido una tarea.
-        public async Task<Result<IEnumerable<Historial>>> GetHistorialDeUnaTareaAsync(int idTarea)
+        public async Task<Result<IEnumerable<Historial>>> GetHistorialAsync(int TareaId)
         {
-            var historial = await _repoHistorial.ObtenerHistorialDeUnaTareaAsync(idTarea);
+            var historial = await _repoHistorial.ObtenerHistorialAsync(TareaId);
             if (!historial.Any()) return Result<IEnumerable<Historial>>.Mal("La tarea no tiene cambios realizados.");
 
             return Result<IEnumerable<Historial>>.Bien(historial);
@@ -45,56 +45,56 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Registrar un comentario
-        public async Task RegistrarComentarioAsync(Comentario comentario, int idPropia)
+        public async Task RegistrarComentarioAsync(Comentario comentario, int propiaId)
         {
             await RegistrarAsync(
-                comentario.Tarea.ProyectoId,
-                idPropia,
+                comentario.Tarea!.ProyectoId,
+                propiaId,
                 HistorialActions.ComentarioCreado);
         }
 
         // Modificar un comentario
-        public async Task ModificarComentarioAsync(Comentario comentario, int idPropia)
+        public async Task ModificarComentarioAsync(Comentario comentario, int propiaId)
         {
             await RegistrarAsync(
-                comentario.Tarea.ProyectoId,
-                idPropia,
+                comentario.Tarea!.ProyectoId,
+                propiaId,
                 HistorialActions.ComentarioModificado);
         }
 
         // Modificar un proyecto
-        public async Task ModificarProyectoAsync(Proyecto proyecto, int idPropia)
+        public async Task ModificarProyectoAsync(Proyecto proyecto, int propiaId)
         {
             await RegistrarAsync(
                 proyecto.Id,
-                idPropia,
+                propiaId,
                 HistorialActions.ProyectoModificado);
         }
 
         // Modificar dueño de un proyecto
-        public async Task ModificarDueñoProyectoAsync(Proyecto proyecto, int idPropia)
+        public async Task ModificarDueñoProyectoAsync(Proyecto proyecto, int propiaId)
         {
             await RegistrarAsync(
                 proyecto.Id,
-                idPropia,
+                propiaId,
                 HistorialActions.ProyectoDueñoModificado);
         }
 
         // Añadir persona a un proyecto
-        public async Task AñadirPersonaProyectoAsync(int proyectoId, int idPropia)
+        public async Task AñadirPersonaProyectoAsync(int proyectoId, int propiaId)
         {
             await RegistrarAsync(
                 proyectoId,
-                idPropia,
+                propiaId,
                 HistorialActions.AñadirPersona);
         }
 
         // Modificar persona de un proyecto
-        public async Task ModificarPersonaProyectoAsync(int proyectoId, int idPropia)
+        public async Task ModificarPersonaProyectoAsync(int proyectoId, int propiaId)
         {
             await RegistrarAsync(
                 proyectoId,
-                idPropia,
+                propiaId,
                 HistorialActions.ModificarPersonaEnProyecto);
         }
 
@@ -108,20 +108,20 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Modificar una tarea
-        public async Task ModificarTareaAsync(Tarea tarea, int idPropio)
+        public async Task ModificarTareaAsync(Tarea tarea, int propiaId)
          {
             await RegistrarAsync(
                 tarea.ProyectoId,
-                idPropio,
+                propiaId,
                 HistorialActions.ModificarTarea);
         }
 
         // Modificar el estado de una  tarea
-        public async Task ModificarEstadoTareaAsync(Tarea tarea, int idPropio)
+        public async Task ModificarEstadoTareaAsync(Tarea tarea, int propiaId)
          {
             await RegistrarAsync(
                 tarea.ProyectoId,
-                idPropio,
+                propiaId,
                 HistorialActions.ModificarEstadoTarea);
         }
     }

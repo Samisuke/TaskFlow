@@ -17,13 +17,12 @@ namespace TaskFlow.Infrastructure.Services
 
         // Peticiones GET
         // Obtener una etiqueta. Útil si quieres mostrar una etiqueta como sugerencia, por ejemplo.
-        public async Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int idEtiqueta)
+        public async Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int etiquetaId)
         {
-            var etiqueta = await _repoEtiqueta.ObtenerUnaEtiquetaPorIdAsync(idEtiqueta);
+            var etiqueta = await _repoEtiqueta.ObtenerUnaEtiquetaPorIdAsync(etiquetaId);
             if (etiqueta is null) return Result<Etiqueta>.Mal("La etiqueta no existe");
 
             return Result<Etiqueta>.Bien(etiqueta);
-            
         }
     }
 }

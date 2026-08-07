@@ -1,6 +1,8 @@
 using FluentValidation;
 using TaskFlow.Core.Dto.Comentario;
 
+// Validaciones relacionadas con los comentarios, tanto creación como edición.
+
 namespace TaskFlow.Core.Validations
 {
     public class ComentarioValidator : AbstractValidator<ComentarioWriteDto>

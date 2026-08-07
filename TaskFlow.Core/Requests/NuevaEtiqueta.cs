@@ -1,3 +1,6 @@
+// DTO utilizado para representar una etiqueta proporcionada por el cliente.
+// Se utiliza al crear o asignar etiquetas a una tarea.
+
 namespace TaskFlow.Core.Requests
 {
     public class NuevaEtiqueta

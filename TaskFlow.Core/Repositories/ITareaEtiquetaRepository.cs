@@ -1,5 +1,7 @@
 using TaskFlow.Core.Models;
 
+// Define las operaciones de acceso y persistencia de las relaciones entre tareas y etiquetas.
+
 namespace TaskFlow.Core.Repositories
 {
     public interface ITareaEtiquetaRepository

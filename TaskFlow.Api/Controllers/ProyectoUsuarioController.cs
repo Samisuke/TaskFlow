@@ -6,6 +6,22 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using TaskFlow.Core.Validations;
 
+// Notas para un posible reclutador:
+//
+// Controlador encargado de gestionar la relación entre usuarios y proyectos.
+//
+// Funcionalidades:
+//  - Obtener la información de un usuario dentro de un proyecto.
+//  - Obtener todos los usuarios pertenecientes a un proyecto.
+//  - Añadir un usuario a un proyecto.
+//  - Modificar el rol o el estado de un usuario dentro de un proyecto.
+//
+// La relación ProyectoUsuario permite gestionar la pertenencia, el rol y el
+// estado de cada usuario dentro de un proyecto.
+//
+// Las operaciones de modificación están sujetas a las reglas de permisos
+// definidas por el modelo de negocio y gestionadas desde los servicios.
+
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
@@ -13,32 +29,48 @@ namespace TaskFlow.Api.Controllers
 
     public class ProyectoUsuarioController : ControllerBase
     {
-        private readonly IProyectoUsuarioService _pusuarioService;
+        // Inyección de servicio y validadores.
+        private readonly IProyectoUsuarioService _pUsuarioService;
         private readonly ProyectoUsuarioValidator _validator;
 
-        public ProyectoUsuarioController(IProyectoUsuarioService pusuarioService,
+        public ProyectoUsuarioController(
+            IProyectoUsuarioService pUsuarioService,
             ProyectoUsuarioValidator validator
         )
         {
-            _pusuarioService = pusuarioService;
+            _pUsuarioService = pUsuarioService;
             _validator = validator;
         }
 
-        [HttpGet("proyecto/{idProyecto}/usuario/{id}")]
+        // Permite ver el perfil de un usuario dentro de un proyecto.
+        [HttpGet("proyecto/{ProyectoId}/usuario/{usuarioId}")]
         [Authorize]
-        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetProyectoUsuario(int idProyecto, int id)
+        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetPerfil(int ProyectoId, int usuarioId)
         {
-            var usuario = await _pusuarioService.GetUsuarioDeUnProyectoAsync(idProyecto, id);
+            var usuario = await _pUsuarioService.GetUsuarioDeUnProyectoAsync(ProyectoId, usuarioId);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<ProyectoUsuarioReadDto>());
         }
 
-        [HttpGet("proyecto/{idProyecto}/usuarios")]
+        // Permite ver tu perfil de un usuario dentro de un proyecto.
+        [HttpGet("proyecto/{ProyectoId}/mi-perfil")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ProyectoUsuarioReadDto>>> GetUsuariosProyecto(int idProyecto)
+        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetPerfilPropio(int ProyectoId)
         {
-            var usuario = await _pusuarioService.GetTodosLosUsuariosDeUnProyectoAsync(idProyecto);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var usuario = await _pUsuarioService.GetUsuarioDeUnProyectoAsync(ProyectoId, idJWT);
+            if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
+
+            return Ok(usuario.Valor.Adapt<ProyectoUsuarioReadDto>());
+        }
+
+        // Permite ver todos los perfiles de usuario dentro de un proyecto.
+        [HttpGet("proyecto/{ProyectoId}/usuarios")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<ProyectoUsuarioReadDto>>> GetPerfiles(int ProyectoId)
+        {
+            var usuario = await _pUsuarioService.GetTodosLosUsuariosDeUnProyectoAsync(ProyectoId);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<IEnumerable<ProyectoUsuarioReadDto>>());
@@ -46,7 +78,7 @@ namespace TaskFlow.Api.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult> PostProyectoUsuario([FromBody] ProyectoUsuarioWriteDto proyetoUsuarioWriteDto)
+        public async Task<ActionResult> PostPerfil([FromBody] ProyectoUsuarioWriteDto proyetoUsuarioWriteDto)
         {
             var validationResult = await _validator.ValidateAsync(proyetoUsuarioWriteDto);
             if (!validationResult.IsValid)
@@ -58,32 +90,32 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var miembroProyecto = await _pusuarioService.PostUsuarioAsync(
-                id,
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var miembroProyecto = await _pUsuarioService.PostUsuarioAsync(
+                idJWT,
                 proyetoUsuarioWriteDto.UsuarioId,
                 proyetoUsuarioWriteDto.ProyectoId,
                 proyetoUsuarioWriteDto.Rol
             );
-            if (!miembroProyecto.EsCorrecto ||miembroProyecto.Valor is null) return NotFound(miembroProyecto.MensajeError);
+            if (!miembroProyecto.EsCorrecto ||miembroProyecto.Valor is null) return BadRequest(miembroProyecto.MensajeError);
 
             var usuarioDto = miembroProyecto.Valor.Adapt<ProyectoUsuarioReadDto>();
             return Ok(usuarioDto);
         }
 
-        [HttpPatch("proyecto/{idProyecto}/usuario/{idUsuario}")]
+        [HttpPatch("proyecto/{proyectoId}/usuario/{usuarioId}")]
         [Authorize]
-        public async Task<ActionResult> PatchUsuarioProyecto(int idProyecto,int idUsuario, [FromBody] ProyectoUsuarioPathcDto proyetoUsuarioPathcDto)
+        public async Task<ActionResult> PatchPerfil(int proyectoId,int usuarioId, [FromBody] ProyectoUsuarioPatchDto proyetoUsuarioPathcDto)
         {
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var usuario = await _pusuarioService.PatchUsuarioAsync(
-                id,
-                idUsuario,
-                idProyecto,
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var usuario = await _pUsuarioService.PatchUsuarioAsync(
+                idJWT,
+                usuarioId,
+                proyectoId,
                 proyetoUsuarioPathcDto.Activo,
                 proyetoUsuarioPathcDto.Rol
             );
-            if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
+            if (!usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
 
             var usuarioDto = usuario.Adapt<ProyectoUsuarioReadDto>();
             return Ok(usuarioDto);

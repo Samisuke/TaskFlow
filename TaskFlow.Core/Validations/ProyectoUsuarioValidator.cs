@@ -1,6 +1,8 @@
 using FluentValidation;
 using TaskFlow.Core.Dto.ProyectoUsuario;
 
+// Validaciones relacionadas con los perfiles de usuario dentro de un proyecto.
+
 namespace TaskFlow.Core.Validations
 {
     public class ProyectoUsuarioValidator : AbstractValidator<ProyectoUsuarioWriteDto>

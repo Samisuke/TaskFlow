@@ -15,7 +15,7 @@ namespace TaskFlow.Core.Dto.ProyectoUsuario
         public string Apellidos {get; set;} = string.Empty;
         public string Email {get; set;} = string.Empty;
         public ICollection<ProyectoUsuarioReadDtoTareasAsignadas> TareasAsignadas {get; set;} = null!;
-        public ICollection<ProeyectoUsuarioReadDtoTareasCreadas> TareasCreadas {get; set;} = null!;
+        public ICollection<ProyectoUsuarioReadDtoTareasCreadas> TareasCreadas {get; set;} = null!;
     }
     public class ProyectoUsuarioReadDtoTareasAsignadas
     {
@@ -25,7 +25,7 @@ namespace TaskFlow.Core.Dto.ProyectoUsuario
         public PrioridadTarea Prioridad {get; set;}
     }
 
-    public class ProeyectoUsuarioReadDtoTareasCreadas
+    public class ProyectoUsuarioReadDtoTareasCreadas
     {
         public string Titulo {get; set;} = string.Empty;
         public string Descripcion {get; set;} = string.Empty;

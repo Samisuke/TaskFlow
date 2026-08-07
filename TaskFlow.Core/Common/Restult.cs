@@ -1,3 +1,24 @@
+// Notas para un posible reclutador:
+//
+// Clase utilizada para representar de forma uniforme el resultado de las
+// operaciones realizadas por los servicios.
+//
+// Permite indicar:
+//  - Si la operación se ha realizado correctamente.
+//  - El valor devuelto cuando la operación tiene éxito.
+//  - El mensaje de error cuando la operación falla.
+//
+// Se utiliza como contrato entre los servicios y los controllers, evitando
+// depender de excepciones para controlar errores esperados de la lógica
+// de negocio.
+//
+// También permite mantener los servicios independientes de HTTP, ya que
+// no devuelven directamente códigos de estado ni tipos propios de ASP.NET Core.
+//
+// Existen versiones genéricas y no genéricas para operaciones que necesitan
+// devolver un valor y para aquellas que únicamente necesitan indicar si la
+// operación ha sido correcta.
+
 namespace TaskFlow.Core.Common
 {
     public class Result<T>

@@ -70,7 +70,7 @@ namespace TaskFlow.Infrastructure.Services
             if (!nuevoUsuario.Activo) return false;
 
             // Comprobación de pertenencia
-            if (await EsMiembroActivoAsync(proyectoId, idPropia)) return false;
+            if (await EsMiembroActivoAsync(proyectoId, nuevoUsuarioId)) return false;
 
             return true;
         }

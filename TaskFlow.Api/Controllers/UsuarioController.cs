@@ -5,6 +5,25 @@ using Mapster;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using TaskFlow.Core.Validations;
+
+// Notas para un posible reclutador:
+//
+// Controlador encargado de gestionar los usuarios.
+//
+// Funcionalidades:
+//  - Obtener un usuario por su ID.
+//  - Obtener el perfil del usuario autenticado mediante su JWT.
+//  - Buscar un usuario mediante su email.
+//  - Crear un usuario.
+//  - Modificar los datos personales de un usuario.
+//  - Modificar la contraseña de un usuario comprobando previamente su contraseña actual.
+//
+// La identidad del usuario autenticado se obtiene del JWT en las operaciones
+// que afectan al propio usuario, evitando que el cliente pueda modificar
+// arbitrariamente la identidad sobre la que se realiza la operación.
+//
+// Las comprobaciones de permisos y las reglas de negocio se delegan en los servicios.
+
 namespace TaskFlow.Api.Controllers
 {
     [ApiController]
@@ -12,12 +31,14 @@ namespace TaskFlow.Api.Controllers
 
     public class UsuarioController : ControllerBase
     {
+        // Inyección de servicio y validadores.
         private readonly IUsuarioService _usuarioService;
         private readonly UsuarioValidator _validator;
         private readonly UsuarioPatchValidator _validatorPatch;
         private readonly UsuarioPatchPassValidator _validatorPass;
 
-        public UsuarioController(IUsuarioService usuarioService,
+        public UsuarioController(
+            IUsuarioService usuarioService,
             UsuarioValidator validator,
             UsuarioPatchValidator validatorPatch,
             UsuarioPatchPassValidator validatorPass
@@ -30,40 +51,39 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Obtener un usuario por ID.
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UsuarioReadDto>> GetUsuario()
+        [HttpGet("{usuarioId}")]
+        public async Task<ActionResult<UsuarioReadDto>> GetUsuario(int usuarioId)
         {
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var usuario = await _usuarioService.GetUsuarioPorIdAsync(id);
+            var usuario = await _usuarioService.GetUsuarioPorIdAsync(usuarioId);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<UsuarioReadDto>());
         } 
 
         // Obtener tu perfil personal.
-        [HttpGet("perfil")]
+        [HttpGet("mi-perfil-personal")]
         [Authorize]
-        public async Task<ActionResult<UsuarioReadDto>> GetTuPerfil()
+        public async Task<ActionResult<UsuarioReadDto>> GetMiPerfilPersonal()
         {
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var usuario = await _usuarioService.GetUsuarioPorIdAsync(id);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var usuario = await _usuarioService.GetUsuarioPorIdAsync(idJWT);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<UsuarioReadDto>());
         } 
 
         // Obtener un usuario por email.
-        [HttpGet("buscar/{email}")]
+        [HttpGet("buscar/{usuarioEmail}")]
         [Authorize]
-        public async Task<ActionResult<UsuarioReadDto>> GetUsuarioPorEmail(string email)
+        public async Task<ActionResult<UsuarioResumenDto>> GetUsuarioEmail(string usuarioEmail)
         {
-            var usuario = await _usuarioService.GetUsuarioPorEmailAsync(email);
+            var usuario = await _usuarioService.GetUsuarioPorEmailAsync(usuarioEmail);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
-            return Ok(usuario.Valor.Adapt<UsuarioReadDto>());
+            return Ok(usuario.Valor.Adapt<UsuarioResumenDto>());
         } 
 
-        // Crear un usuario.
+        // Crear un usuario (una cuenta).
         [HttpPost]
         public async Task<ActionResult> PostUsuario([FromBody] UsuarioWriteDto usuarioWriteDto)
         {
@@ -89,7 +109,7 @@ namespace TaskFlow.Api.Controllers
             return CreatedAtAction(nameof(GetUsuario), new {id = usuarioDto.Id}, usuarioDto);
         }
 
-        // Modificar tu perfil.
+        // Modificar tu perfil personal.
         [HttpPatch]
         [Authorize]
         public async Task<ActionResult> PatchUsuario([FromBody] UsuarioPatchDto usuarioPatchDto)
@@ -104,15 +124,15 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.PatchUsuarioAsync(
-                id,
+                idJWT,
                 usuarioPatchDto.Nombre,
                 usuarioPatchDto.Apellidos,
                 usuarioPatchDto.Email,
                 usuarioPatchDto.Activo
             );
-            if (usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
+            if (!usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
 
             var usuarioDto = usuario.Valor.Adapt<UsuarioReadDto>();
             return Ok(usuarioDto);
@@ -133,9 +153,9 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var id = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var usuario = await _usuarioService.PatchUsuarioPassAsync(
-                id,
+                idJWT,
                 usuarioPassDto.PassNueva,
                 usuarioPassDto.PassAntigua
             );

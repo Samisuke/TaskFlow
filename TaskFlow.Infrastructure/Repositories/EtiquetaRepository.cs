@@ -16,13 +16,6 @@ namespace TaskFlow.Infrastructure.Repositories
         }
 
         // Métodos GET
-        // Todas las etiquetas simples
-        public async Task <IEnumerable<Etiqueta>> ObtenerTodasLasEtiquetasSimplesAsync()
-        {
-            return await _context.Etiquetas
-                .ToListAsync();
-        }
-
         // Una etiqueta simple por ID
         public async Task <Etiqueta?> ObtenerUnaEtiquetaPorIdAsync(int idEtiqueta)
         {

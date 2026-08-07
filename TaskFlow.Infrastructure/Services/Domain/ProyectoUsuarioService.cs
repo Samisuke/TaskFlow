@@ -11,11 +11,12 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección del repositorio
         private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
         private readonly IProyectoPermissionService _proyectoPermission;
-        private readonly IHIstorialService _historialService;
+        private readonly IHistorialService _historialService;
 
-        public ProyectoUsuarioService(IProyectoUsuarioRepository repoProyectoUsuario,
-        IProyectoPermissionService proyectoPermission,
-        IHIstorialService historialService
+        public ProyectoUsuarioService(
+            IProyectoUsuarioRepository repoProyectoUsuario,
+            IProyectoPermissionService proyectoPermission,
+            IHistorialService historialService
         )
         {
             _repoProyectoUsuario = repoProyectoUsuario;
@@ -25,18 +26,18 @@ namespace TaskFlow.Infrastructure.Services
 
         // Peticiones GET
         // Todos los usuarios de un proyecto. Útil para ver de un vistazo quien trabaja en ese proyecto.
-        public async Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosLosUsuariosDeUnProyectoAsync(int idProyecto)
+        public async Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosLosUsuariosDeUnProyectoAsync(int proyectoId)
         {
-            var usuarios = await _repoProyectoUsuario.ObtenerTodosUsuariosDeUnProyectoAsync(idProyecto);
+            var usuarios = await _repoProyectoUsuario.ObtenerTodosUsuariosDeUnProyectoAsync(proyectoId);
             if (!usuarios.Any()) return Result<IEnumerable<ProyectoUsuario>>.Mal("El Proyecto aun no tiene usuarios.");
 
             return Result<IEnumerable<ProyectoUsuario>>.Bien(usuarios);
         }
 
         // Un usuario específico de un proyecto. Incluye la información de su perfil. Útil si te interesa ver más información de un usuario.
-        public async Task<Result<ProyectoUsuario?>> GetUsuarioDeUnProyectoAsync(int idProyecto, int idUsuario)
+        public async Task<Result<ProyectoUsuario?>> GetUsuarioDeUnProyectoAsync(int proyectoId, int usuarioId)
         {
-            var usuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idUsuario);
+            var usuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(proyectoId, usuarioId);
             if (usuario is null) return Result<ProyectoUsuario?>.Mal("El proyecto no tiene ese usuario asignado.");
 
             return Result<ProyectoUsuario?>.Bien(usuario);
@@ -45,15 +46,14 @@ namespace TaskFlow.Infrastructure.Services
         //Petición POST
         // Añadir un usuario a un proyecto.
         public async Task<Result<ProyectoUsuario>> PostUsuarioAsync(
-            int idPropia,
+            int propiaId,
             int usuarioId,
             int proyectoId,
-            // El usuario estará activo por defecto cuando lo añadas a un proyecto.
             RolProyecto rolUsuario
         )
         {
             // Comprobaciones.
-            if (!await _proyectoPermission.PuedeAñadirPersonasAsync(proyectoId, usuarioId, idPropia)) return Result<ProyectoUsuario>.Mal("No puedes añadir este usuario al proyecto.");
+            if (!await _proyectoPermission.PuedeAñadirPersonasAsync(proyectoId, usuarioId, propiaId)) return Result<ProyectoUsuario>.Mal("No puedes añadir este usuario al proyecto.");
             
             // Creación de usuario nuevo.
             var usuario = new ProyectoUsuario
@@ -62,7 +62,7 @@ namespace TaskFlow.Infrastructure.Services
                 FechaIncorporacion = DateTime.UtcNow,
                 ProyectoId = proyectoId,
                 Rol = rolUsuario,
-                Activo = true
+                Activo = true // El usuario se crea activo por defecto
             };
 
             // Base de datos.
@@ -70,7 +70,7 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
 
-            await _historialService.AñadirPersonaProyectoAsync(proyectoId, idPropia);
+            await _historialService.AñadirPersonaProyectoAsync(proyectoId, propiaId);
 
             return Result<ProyectoUsuario>.Bien(usuario);
         }
@@ -78,7 +78,7 @@ namespace TaskFlow.Infrastructure.Services
         //Petición PATCH
         // Modificar el estado y el rol de un usuario de un proyecto. Solo puede hacerse si eres el Manager del proyecto.
         public async Task<Result<ProyectoUsuario>> PatchUsuarioAsync(
-            int idPropia,
+            int propiaId,
             int idUsuarioACambiar,
             int proyectoId,
             bool? activoUsuario,
@@ -86,12 +86,12 @@ namespace TaskFlow.Infrastructure.Services
         )
         {
             int numeroCambios = 0;
-
+            
             var usuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(proyectoId, idUsuarioACambiar);
             if (usuario is null) return Result<ProyectoUsuario>.Mal("No se encuentra el usuario.");
 
             // Comprobaciones
-            if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyectoId, idPropia))
+            if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyectoId, propiaId))
 
             // Realización de cambios.
             if (activoUsuario.HasValue)
@@ -110,7 +110,7 @@ namespace TaskFlow.Infrastructure.Services
             var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
             if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
 
-            await _historialService.ModificarPersonaProyectoAsync(proyectoId, idPropia);
+            await _historialService.ModificarPersonaProyectoAsync(proyectoId, propiaId);
 
             return Result<ProyectoUsuario>.Bien(usuario);
         }

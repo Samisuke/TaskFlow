@@ -1,6 +1,24 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
+// Notas para un posible reclutador:
+//
+// Middleware encargado de gestionar las excepciones no controladas de la aplicación.
+//
+// Responsabilidades:
+//  - Capturar las excepciones que se produzcan durante el procesamiento de una petición.
+//  - Evitar que las excepciones lleguen directamente al cliente.
+//  - Devolver una respuesta HTTP controlada y consistente.
+//  - Evitar exponer información interna de la aplicación al cliente.
+//
+// De esta forma, los servicios y controllers no necesitan utilizar bloques
+// try/catch para gestionar errores inesperados, manteniendo separada la gestión
+// de excepciones de la lógica de negocio.
+//
+// Los errores inesperados se registrarán mediante el sistema de logging,
+// permitiendo posteriormente utilizar Serilog para centralizar y monitorizar
+// estos errores.
+
 namespace TaskFlow.Api.Middlewares
 {
     public class GlobalExceptionHandler : IExceptionHandler

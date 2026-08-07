@@ -2,6 +2,8 @@ using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 
+// Define la lógica de negocio relacionada con los usuarios.
+
 namespace TaskFlow.Core.Services
 {
     public interface IUsuarioService

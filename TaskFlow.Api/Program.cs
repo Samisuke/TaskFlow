@@ -32,7 +32,7 @@ builder.Services.AddScoped<ITareaService, TareaService>();
 builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddScoped<IHistorialRepository, HistorialRepository>();
-builder.Services.AddScoped<IHIstorialService, HistorialService>();
+builder.Services.AddScoped<IHistorialService, HistorialService>();
 builder.Services.AddScoped<IProyectoUsuarioRepository, ProyectoUsuarioRepository>();
 builder.Services.AddScoped<IProyectoUsuarioService, ProyectoUsuarioService>();
 builder.Services.AddScoped<ITareaEtiquetaRepository, TareaEtiquetaRepository>();
@@ -80,6 +80,8 @@ builder.Services.AddAuthentication(config =>
     };
 });
 
+builder.Services.AddAuthorization();
+
 // Validations
 builder.Services.AddValidatorsFromAssemblyContaining<UsuarioValidator>();
 
@@ -96,8 +98,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 app.UseHttpsRedirection();
-
-builder.Services.AddAuthorization();
 app.UseAuthentication();
 app.UseAuthorization();
 
