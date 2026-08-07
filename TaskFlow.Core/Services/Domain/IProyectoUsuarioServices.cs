@@ -9,12 +9,12 @@ namespace TaskFlow.Core.Services
     public interface IProyectoUsuarioService
     {
         // Métodos GET 
-        Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosLosUsuariosDeUnProyectoAsync(int idProyecto);
-        Task<Result<ProyectoUsuario?>> GetUsuarioDeUnProyectoAsync(int idProyecto, int idUsuario);
+        Task<Result<IEnumerable<ProyectoUsuario>>> GetTodosLosUsuariosDeUnProyectoAsync(int proyectoId);
+        Task<Result<ProyectoUsuario?>> GetUsuarioDeUnProyectoAsync(int proyectoId, int usuarioId);
 
         // Métodos POST
         Task<Result<ProyectoUsuario>> PostUsuarioAsync(
-            int idPropia,
+            int propiaId,
             int usuarioId,
             int proyectoId,
             // El usuario estará activo por defecto cuando lo añadas a un proyecto.
@@ -23,9 +23,9 @@ namespace TaskFlow.Core.Services
 
         // Métodos PATCH
         Task<Result<ProyectoUsuario>> PatchUsuarioAsync(
-            int idPropia,
+            int propiaId,
             int idUsuarioACambiar,
-            int idProyecto,
+            int proyectoId,
             bool? activoUsuario,
             RolProyecto? rolUsuario
         );

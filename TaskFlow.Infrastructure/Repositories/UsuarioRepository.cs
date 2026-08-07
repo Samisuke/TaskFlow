@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TaskFlow.Infrastructure.Repositories
 {
-    public class UsuarioReposity : IUsuarioRepository
+    public class UsuarioRepository : IUsuarioRepository
     {
         // Inyección del context
         private readonly TaskFlowDbContext _context;
-        public UsuarioReposity(TaskFlowDbContext context)
+        public UsuarioRepository(TaskFlowDbContext context)
         {
             _context = context;
         }

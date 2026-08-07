@@ -83,8 +83,7 @@ namespace TaskFlow.Infrastructure.Services
             int usuarioId,
             string? nombreUsuario,
             string? apellidosUsuario,
-            string? emailUsuario,
-            bool? activoUsuario
+            string? emailUsuario
         )
         {
             int numeroCambios = 0;

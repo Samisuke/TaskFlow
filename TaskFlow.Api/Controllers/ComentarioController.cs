@@ -62,9 +62,9 @@ namespace TaskFlow.Api.Controllers
         // Obtener un comentario concreto por ID.
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<ComentarioReadDto>> GetComentario(int id)
+        public async Task<ActionResult<ComentarioReadDto>> GetComentario(int comentarioId)
         {
-            var comentario = await _comentarioService.GetComentarioPorIdAsync(id);
+            var comentario = await _comentarioService.GetComentarioPorIdAsync(comentarioId);
             if (!comentario.EsCorrecto ||comentario.Valor is null) return NotFound(comentario.MensajeError);
 
             return Ok(comentario.Valor.Adapt<ComentarioReadDto>());
@@ -73,9 +73,9 @@ namespace TaskFlow.Api.Controllers
         // Obtener comentarios de un usuario por ID del usuario.
         [HttpGet("usuario/{id}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosUsuario(int id)
+        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosUsuario(int usuarioId)
         {
-            var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(id);
+            var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(usuarioId);
             if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
 
             return Ok(comentarios.Valor.Adapt<IEnumerable<ComentarioReadDto>>());
@@ -84,9 +84,9 @@ namespace TaskFlow.Api.Controllers
         // Obtener todos los comentarios de una tarea.
         [HttpGet("tarea/{idTarea}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosTarea(int idTarea)
+        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosTarea(int tareaId)
         {
-            var comentarios = await _comentarioService.GetComentariosDeUnaTareaAsync(idTarea);
+            var comentarios = await _comentarioService.GetComentariosDeUnaTareaAsync(tareaId);
             if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
 
             return Ok(comentarios.Valor.Adapt<IEnumerable<ComentarioReadDto>>());
@@ -116,7 +116,7 @@ namespace TaskFlow.Api.Controllers
             if (!comentario.EsCorrecto ||comentario.Valor is null) return BadRequest(comentario.MensajeError);
 
             var comentarioDto = comentario.Valor.Adapt<ComentarioReadDto>();
-            return CreatedAtAction(nameof(GetComentario), new {id = comentarioDto.Id}, comentarioDto);
+            return CreatedAtAction(nameof(GetComentario), new {comentarioId = comentarioDto.Id}, comentarioDto);
         }
 
         // Modificar un comentario

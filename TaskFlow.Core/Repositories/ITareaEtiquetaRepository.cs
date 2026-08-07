@@ -7,7 +7,7 @@ namespace TaskFlow.Core.Repositories
     public interface ITareaEtiquetaRepository
     {
         // GET
-        Task <IEnumerable<TareaEtiqueta>> ObtenerEtiquetasDeUnaTareaAsync(int idTarea);
+        Task <IEnumerable<TareaEtiqueta>> ObtenerEtiquetasDeUnaTareaAsync(int tareaId);
 
         // POST
         Task CrearTareaEtiquetaAsync(TareaEtiqueta tareaEtiqueta);

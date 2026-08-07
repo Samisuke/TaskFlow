@@ -91,7 +91,7 @@ namespace TaskFlow.Infrastructure.Services
             if (usuario is null) return Result<ProyectoUsuario>.Mal("No se encuentra el usuario.");
 
             // Comprobaciones
-            if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyectoId, propiaId))
+            if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyectoId, propiaId)) return Result<ProyectoUsuario>.Mal("No puedes modificar los usuarios de este proyecto.");
 
             // Realización de cambios.
             if (activoUsuario.HasValue)

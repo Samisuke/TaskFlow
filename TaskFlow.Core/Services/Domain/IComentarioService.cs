@@ -8,9 +8,9 @@ namespace TaskFlow.Core.Services
     public interface IComentarioService
     {
         // Métodos GET
-        Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnUsuarioAsync(int idUsuario);
-        Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnaTareaAsync(int idTarea);
-        Task <Result<Comentario>> GetComentarioPorIdAsync(int id);
+        Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnUsuarioAsync(int usuarioId);
+        Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnaTareaAsync(int tareaId);
+        Task <Result<Comentario>> GetComentarioPorIdAsync(int comentarioId);
         
         // Métodos POST
         Task <Result<Comentario>> PostComentarioAsync(
@@ -20,6 +20,6 @@ namespace TaskFlow.Core.Services
         );
 
         // Métodos PATCH
-        Task <Result<Comentario>> PatchComentarioAsync(int idPropio, int idComentario, string contenidoComentario);
+        Task <Result<Comentario>> PatchComentarioAsync(int propioId, int comentarioId, string contenidoComentario);
     }
 }

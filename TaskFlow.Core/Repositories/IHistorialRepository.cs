@@ -7,7 +7,7 @@ namespace TaskFlow.Core.Repositories
     public interface IHistorialRepository
     {
         // GET
-        Task <IEnumerable<Historial>> ObtenerHistorialAsync(int idProyecto);
+        Task <IEnumerable<Historial>> ObtenerHistorialAsync(int proyectoId);
 
         // POST
         Task CrearHistorialAsync(Historial historial);

@@ -9,8 +9,8 @@ namespace TaskFlow.Core.Services
     {
         // Métodos GET
         Task<Result<Proyecto>> GetProyectoPorIdAsync(int id);
-        Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int idUsuario);
-        Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int idCreador);
+        Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int usuarioId);
+        Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int creadorId);
 
         // Métodos POST
         Task<Result<Proyecto>> PostProyectoAsync(
@@ -21,14 +21,14 @@ namespace TaskFlow.Core.Services
 
         // Métodos PATCH
         Task<Result<Proyecto>> PatchProyectoAsync(
-        int idPropia,
-        int idProyecto,
+        int propiaId,
+        int proyectoId,
         string? nombreProyecto,
         string? descripcionProyecto
         );
         Task<Result<Proyecto>> PatchDueñoProyectoAsync(
-        int idPropia,
-        int idProyecto,
+        int propiaId,
+        int proyectoId,
         int PropietarioId
         );
     }

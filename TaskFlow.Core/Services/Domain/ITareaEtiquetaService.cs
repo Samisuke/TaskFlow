@@ -9,7 +9,7 @@ namespace TaskFlow.Core.Services
     public interface ITareaEtiquetaService
     {
         // Métodos GET
-        Task<Result<IEnumerable<TareaEtiqueta>>> GetEtiquetasDeUnaTareaAsync(int idTarea);
+        Task<Result<IEnumerable<TareaEtiqueta>>> GetEtiquetasDeUnaTareaAsync(int tareaId);
 
         // Misc.
         // Comprobamos si una etiqueta ya existe con un nombre y color que recibimos de la tarea. Si existe, devolvemos esa etiqueta.

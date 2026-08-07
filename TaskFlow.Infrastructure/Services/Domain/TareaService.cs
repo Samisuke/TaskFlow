@@ -11,7 +11,7 @@ namespace TaskFlow.Infrastructure.Services
     {
         // Inyección de repositorios
         private readonly ITareaRepository _repoTarea;
-        private readonly ITareaEtiquetaService _TareaEtiquetaService;
+        private readonly ITareaEtiquetaService _tareaEtiquetaService;
         private readonly ITareaPermissionService _tareaPermissions;
         private readonly IHistorialService _historialService;
 
@@ -23,7 +23,7 @@ namespace TaskFlow.Infrastructure.Services
         )
         {
             _repoTarea = repoTarea;
-            _TareaEtiquetaService = TareaEtiquetaService;
+            _tareaEtiquetaService = TareaEtiquetaService;
             _tareaPermissions = tareaPermissions;
             _historialService = historialService;
         }
@@ -104,10 +104,10 @@ namespace TaskFlow.Infrastructure.Services
             // Procesamos las etiquetas
             if (etiquetas.Count != 0)
             {
-                var comprobarEtiquetas = await _TareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
+                var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
                 if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
 
-                var asignarEtiquetas =  await _TareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
+                var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
                 if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
             }
 
@@ -161,10 +161,10 @@ namespace TaskFlow.Infrastructure.Services
             // Procesamos las etiquetas.
             if (etiquetas.Any())
             {
-                var comprobarEtiquetas = await _TareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
+                var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
                 if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
 
-                var asignarEtiquetas =  await _TareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
+                var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
                 if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
 
                 numeroCambios += 1;

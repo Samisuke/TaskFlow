@@ -21,7 +21,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Scopes
-builder.Services.AddScoped<IUsuarioRepository, UsuarioReposity>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();

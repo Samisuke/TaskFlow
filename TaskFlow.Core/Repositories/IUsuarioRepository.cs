@@ -9,8 +9,8 @@ namespace TaskFlow.Core.Repositories
         // GET
         // Metodo implementado para la administración de la aplicación.
         Task <IEnumerable<Usuario>> ObtenerTodosUsuariosAsync();
-        Task <Usuario?> ObtenerUsuarioPorIdAsync(int idUsuario);
-        Task <Usuario?> ObtenerUsuarioPorEmailAsync(string email);
+        Task <Usuario?> ObtenerUsuarioPorIdAsync(int usuarioId);
+        Task <Usuario?> ObtenerUsuarioPorEmailAsync(string emailUsuario);
 
         // POST
         Task CrearUnUsuarioNuevoAsync(Usuario usuario);

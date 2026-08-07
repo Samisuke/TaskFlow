@@ -10,7 +10,7 @@ namespace TaskFlow.Core.Services
     {
         // Métodos GET
         Task<Result<IEnumerable<Usuario>>> GetTodosUsuariosAsync();
-        Task<Result<Usuario>> GetUsuarioPorIdAsync(int idUsuario);
+        Task<Result<Usuario>> GetUsuarioPorIdAsync(int usuarioId);
         Task<Result<Usuario>> GetUsuarioPorEmailAsync(string emailUsuario);
         
         // Métodos POST
@@ -23,13 +23,12 @@ namespace TaskFlow.Core.Services
 
         // Métodos PATCH
         Task<Result<Usuario>> PatchUsuarioAsync(
-            int idUsuario,
+            int usuarioId,
             string? nombreUsuario,
             string? apellidosUsuario,
-            string? emailUsuario,
-            bool? Activo
+            string? emailUsuario
         );
-        Task<Result<Usuario>> PatchUsuarioPassAsync(int idUsuario, string passNueva, string passAntigua);
+        Task<Result<Usuario>> PatchUsuarioPassAsync(int usuarioId, string passNueva, string passAntigua);
 
     
     }

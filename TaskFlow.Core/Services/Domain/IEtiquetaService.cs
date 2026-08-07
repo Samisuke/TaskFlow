@@ -8,6 +8,6 @@ namespace TaskFlow.Core.Services
     public interface IEtiquetaService
     {
         // Métodos GET
-        Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int idEtiqueta);
+        Task<Result<Etiqueta>> GetEtiquetaPorIdAsync(int etiquetaId);
     }
 }

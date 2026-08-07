@@ -1,6 +1,6 @@
-// Representa el historial de cambios en una tarea.
+// Representa el historial de cambios en un proyecto.
 // Cuando se efectua un cambio, este se registra y guarda.
-// Dispone de informacion sobre el usuario que realizó el cambio y la tarea donde se efectuó.
+// Dispone de informacion sobre el usuario que realizó el cambio que se hizo.
 
 namespace TaskFlow.Core.Models
 {

@@ -7,13 +7,13 @@ namespace TaskFlow.Core.Services
     public interface ITareaPermissionService
     {
         // Comprueba que pertenezcas al proyecto, estés activo y tu rol.
-        Task<bool> PuedePublicarTareasAsync(int idProyecto, int idPropia);
+        Task<bool> PuedePublicarTareasAsync(int proyectoId, int propiaId);
 
         // Contiene las comprobaciones para poder modificar una tarea.
-        Task<bool>PuedeModificarTareasAsync(int idPropia, Tarea tarea);
+        Task<bool>PuedeModificarTareasAsync(int propiaId, Tarea tarea);
 
         // Contiene las comprobaciones para poder modificar el estado de una tarea.
-        Task<bool> PuedeModificarEstadoTareaAsync(int idPropia, Tarea tarea);
+        Task<bool> PuedeModificarEstadoTareaAsync(int propiaId, Tarea tarea);
     }
 
 }

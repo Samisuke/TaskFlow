@@ -7,9 +7,9 @@ namespace TaskFlow.Core.Repositories
     public interface IProyectoRepository
     {
         // GET
-        Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnUsuarioAsync(int idUsuario);
-        Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnCreadorAsync(int idCreador);
-        Task <Proyecto?> ObtenerProyectoPorIdAsync(int idProyecto);
+        Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnUsuarioAsync(int usuarioId);
+        Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnCreadorAsync(int creadorId);
+        Task <Proyecto?> ObtenerProyectoPorIdAsync(int proyectoId);
 
         // POST
         Task CrearProyectoAsync(Proyecto proyecto);

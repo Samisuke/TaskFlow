@@ -7,9 +7,9 @@ namespace TaskFlow.Core.Repositories
     public interface IComentarioRepository
     {
         // GET
-        Task <IEnumerable<Comentario>> ObtenerComentariosDeUnaTareaAsync(int idTarea);
-        Task <IEnumerable<Comentario>> ObtenerComentariosDeUnUsuarioAsync(int idUsuario);
-        Task <Comentario?> ObtenerComentarioPorIdAsync(int id);
+        Task <IEnumerable<Comentario>> ObtenerComentariosDeUnaTareaAsync(int tareaId);
+        Task <IEnumerable<Comentario>> ObtenerComentariosDeUnUsuarioAsync(int usuarioId);
+        Task <Comentario?> ObtenerComentarioPorIdAsync(int comentarioId);
 
         // POST
         Task CrearComentarioAsync(Comentario comentario);

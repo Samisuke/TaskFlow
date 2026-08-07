@@ -10,14 +10,14 @@ namespace TaskFlow.Core.Services
     public interface ITareaService
     {
         // Métodos GET
-        Task <Result<IEnumerable<Tarea>>> GetTareasPendientesDeUsuarioAsync(int idUsuario);
-        Task <Result<IEnumerable<Tarea>>> GetTareasDadasDeUsuarioAsync(int idUsuario);
-        Task <Result<IEnumerable<Tarea>>> GetTareasDeUnProyectoAsync(int idProyecto);
-        Task <Result<Tarea?>> GetTareaPorIdAsync(int id);
+        Task <Result<IEnumerable<Tarea>>> GetTareasPendientesDeUsuarioAsync(int usuarioId);
+        Task <Result<IEnumerable<Tarea>>> GetTareasDadasDeUsuarioAsync(int usuarioId);
+        Task <Result<IEnumerable<Tarea>>> GetTareasDeUnProyectoAsync(int usuarioId);
+        Task <Result<Tarea?>> GetTareaPorIdAsync(int tareaId);
 
         // Métodos POST
         Task <Result<Tarea>> PostTareaAsync(
-            int idPropia,
+            int propiaId,
             string tituloTarea,
             string descripcionTarea,
             EstadoTarea estadoTareaTarea,
@@ -30,8 +30,8 @@ namespace TaskFlow.Core.Services
 
         // Métodos PATCH
         Task <Result<Tarea>> PatchTareaAsync(
-            int idPropia,
-            int idTarea,
+            int propiaId,
+            int tareaId,
             string? tituloTarea,
             string? descripcionTarea,
             PrioridadTarea? prioridadTareaTarea,
@@ -40,8 +40,8 @@ namespace TaskFlow.Core.Services
         );
 
         Task <Result<Tarea>> PatchEstadoTareaAsync(
-            int idPropia, 
-            int idTarea,
+            int propiaId, 
+            int tareaId,
             EstadoTarea estadoTareaTarea
         );
     }

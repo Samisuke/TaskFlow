@@ -38,15 +38,6 @@ namespace TaskFlow.Infrastructure.Services
             return Result<IEnumerable<Comentario>>.Bien(comentarios);
         }
 
-        // Obtener los comentarios que has hecho tú mismo. Útil para ver una lista de tus propios comentarios en las diferentes tareas.
-        public async Task <Result<IEnumerable<Comentario>>> GetComentariosPropiosAsync(int propiaId)
-        {
-            var comentarios = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(propiaId);
-            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("No tienes comentarios todavía.");
-
-            return Result<IEnumerable<Comentario>>.Bien(comentarios);
-        }
-
         // Obtener todos los comentarios de una tarea. Útil para poner una sección de comentarios.
         public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnaTareaAsync(int tareaID)
         {

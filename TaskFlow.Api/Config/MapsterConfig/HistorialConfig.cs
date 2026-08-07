@@ -25,7 +25,7 @@ namespace TaskFlow.Api.Config.MapsterConfig
                 ? src.Nombre : string.Empty)
                 
                 .Map(dest => dest.Descripcion,
-                src => src.Descripcion != null!
+                src => src.Descripcion != null
                 ? src.Descripcion : string.Empty);       
         }   
     }

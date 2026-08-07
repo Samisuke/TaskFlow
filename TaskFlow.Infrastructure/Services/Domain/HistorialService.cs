@@ -17,7 +17,7 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Peticiones GET
-        // Obtener el historial. Útil para mostrar el historial de cambios que ha sufrido una tarea.
+        // Obtener el historial. Útil para mostrar el historial de cambios que ha sufrido un proyecto.
         public async Task<Result<IEnumerable<Historial>>> GetHistorialAsync(int TareaId)
         {
             var historial = await _repoHistorial.ObtenerHistorialAsync(TareaId);

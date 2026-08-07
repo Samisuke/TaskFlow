@@ -123,7 +123,7 @@ namespace TaskFlow.Api.Controllers
             if (!proyectoNuevo.EsCorrecto || proyectoNuevo.Valor is null) return BadRequest(proyectoNuevo.MensajeError);
 
             var proyectoNuevoDto = proyectoNuevo.Valor.Adapt<ProyectoReadDto>();
-            return CreatedAtAction(nameof(GetProyecto), new {id = proyectoNuevoDto.Id}, proyectoNuevoDto);
+            return CreatedAtAction(nameof(GetProyecto), new {proyectoId = proyectoNuevoDto.Id}, proyectoNuevoDto);
         }
 
         // Modificar un proyecto

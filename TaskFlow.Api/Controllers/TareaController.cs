@@ -58,7 +58,7 @@ namespace TaskFlow.Api.Controllers
             var tareas = await _tareaService.GetTareasDeUnProyectoAsync(proyectoId);
             if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
 
-            return Ok(tareas.Valor.Adapt<TareaReadDto>()); 
+            return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
         }
 
         // Obtener las tareas pendientes propias.
@@ -126,7 +126,7 @@ namespace TaskFlow.Api.Controllers
             if (!tarea.EsCorrecto || tarea.Valor is null) return BadRequest(tarea.MensajeError);
 
             var tareaDto = tarea.Valor.Adapt<TareaReadDto>();
-            return CreatedAtAction(nameof(GetTarea), new {id = tareaDto.Id}, tareaDto);
+            return CreatedAtAction(nameof(GetTarea), new {tareaId = tareaDto.Id}, tareaDto);
         }
 
         // Modificar una tarea.

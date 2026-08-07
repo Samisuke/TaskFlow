@@ -52,6 +52,7 @@ namespace TaskFlow.Api.Controllers
 
         // Obtener un usuario por ID.
         [HttpGet("{usuarioId}")]
+        [Authorize]
         public async Task<ActionResult<UsuarioReadDto>> GetUsuario(int usuarioId)
         {
             var usuario = await _usuarioService.GetUsuarioPorIdAsync(usuarioId);
@@ -106,7 +107,7 @@ namespace TaskFlow.Api.Controllers
             if (!usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
 
             var usuarioDto = usuario.Valor.Adapt<UsuarioReadDto>();
-            return CreatedAtAction(nameof(GetUsuario), new {id = usuarioDto.Id}, usuarioDto);
+            return CreatedAtAction(nameof(GetUsuario), new {usuarioId = usuarioDto.Id}, usuarioDto);
         }
 
         // Modificar tu perfil personal.
@@ -129,8 +130,7 @@ namespace TaskFlow.Api.Controllers
                 idJWT,
                 usuarioPatchDto.Nombre,
                 usuarioPatchDto.Apellidos,
-                usuarioPatchDto.Email,
-                usuarioPatchDto.Activo
+                usuarioPatchDto.Email
             );
             if (!usuario.EsCorrecto || usuario.Valor is null) return BadRequest(usuario.MensajeError);
 
