@@ -48,12 +48,5 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             await _context.Comentarios.AddAsync(comentario);
         }
-
-        // Misc.
-        // Guardar
-        public async Task <bool> GuardarCambiosAsync()
-        {
-            return (await _context.SaveChangesAsync()) > 0;
-        }
     }
 }

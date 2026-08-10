@@ -2,6 +2,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Models;
+using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -10,14 +11,17 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección del repositorio
         private readonly IUsuarioRepository _repoUsuario;
         private readonly IPassPermissionService _passPermission;
+        private readonly TaskFlowDbContext _context;
 
         public UsuarioService(
             IUsuarioRepository repoUsuario,
-            IPassPermissionService passPermission
+            IPassPermissionService passPermission,
+            TaskFlowDbContext context
         )
         {
             _repoUsuario = repoUsuario;
             _passPermission = passPermission;
+            _context = context;
         }
 
         // Métodos GET
@@ -71,9 +75,8 @@ namespace TaskFlow.Infrastructure.Services
 
             // Base de datos.
             await _repoUsuario.CrearUnUsuarioNuevoAsync(usuario);
-            var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Usuario>.Mal("Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
-            
+            await _context.SaveChangesAsync();
+
             return Result<Usuario>.Bien(usuario);
         }
 
@@ -108,17 +111,11 @@ namespace TaskFlow.Infrastructure.Services
                 if(emailUsuario is not null) usuario.Email = emailUsuario;
                 numeroCambios += 1;
             } 
-            if (activoUsuario.HasValue)
-            {
-                usuario.Activo = activoUsuario.Value;
-                numeroCambios += 1;
-            } 
 
             // Base de datos
             if (numeroCambios == 0) return Result<Usuario>.Mal("No se han detectado cambios.");
-            var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Usuario>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-            
+            await _context.SaveChangesAsync();
+
             return Result<Usuario>.Bien(usuario);
         }
 
@@ -137,9 +134,7 @@ namespace TaskFlow.Infrastructure.Services
             usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(passNueva);
             
             // Base de datos.
-            var guardadoExitoso = await _repoUsuario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Usuario>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-
+            await _context.SaveChangesAsync();
             return Result<Usuario>.Bien(usuario);
         }
     }

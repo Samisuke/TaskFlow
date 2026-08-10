@@ -13,8 +13,5 @@ namespace TaskFlow.Core.Repositories
 
         // POST
         Task CrearComentarioAsync(Comentario comentario);
-
-        // Misc.
-        Task <bool> GuardarCambiosAsync();
     }
 }

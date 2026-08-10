@@ -50,12 +50,5 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             await _context.Proyectos.AddAsync(proyecto);
         }
-
-        // Misc.
-        // Guardar
-        public async Task<bool> GuardarCambiosASync()
-        {
-            return (await _context.SaveChangesAsync()) > 0;
-        }
     }
 }

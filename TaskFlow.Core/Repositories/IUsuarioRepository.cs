@@ -14,8 +14,5 @@ namespace TaskFlow.Core.Repositories
 
         // POST
         Task CrearUnUsuarioNuevoAsync(Usuario usuario);
-        
-        // Misc.
-        Task <bool> GuardarCambiosAsync();
     }
 }

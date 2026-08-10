@@ -13,8 +13,5 @@ namespace TaskFlow.Core.Repositories
 
         // POST
         Task CrearProyectoAsync(Proyecto proyecto);
-
-        // Misc.
-        Task<bool> GuardarCambiosASync();
     }
 }

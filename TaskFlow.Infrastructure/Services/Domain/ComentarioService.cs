@@ -2,6 +2,7 @@ using TaskFlow.Core.Services;
 using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
+using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -13,13 +14,16 @@ namespace TaskFlow.Infrastructure.Services
         private readonly IProyectoPermissionService _proyectoPermission;
         private readonly IComentarioPermissionService _comentarioPermission;
         private readonly IHistorialService _historialService;
+        private readonly TaskFlowDbContext _context;
+
 
         public ComentarioService(
             IComentarioRepository repoComentario,
             ITareaRepository repoTarea,
             IProyectoPermissionService proyectoPermission,
             IComentarioPermissionService comentarioPermission,
-            IHistorialService historialService
+            IHistorialService historialService,
+            TaskFlowDbContext context
         )
         {
             _repoComentario = repoComentario;
@@ -27,6 +31,7 @@ namespace TaskFlow.Infrastructure.Services
             _proyectoPermission = proyectoPermission;
             _comentarioPermission = comentarioPermission;
             _historialService = historialService;
+            _context = context;
         }
         // Métodos GET
         // Obtener los comentarios que ha hecho un usuario. Útil para ver una lsita de comentarios que un usario ha hecho en tu proyecto.
@@ -71,24 +76,36 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones de proyecto.
             if (!await _proyectoPermission.EsMiembroActivoAsync(tarea.ProyectoId, usuarioId)) return Result<Comentario>.Mal("No puedes comentar en esta tarea.");
 
-            // Creación de comentario.
-            var comentario = new Comentario
+            // Transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                Contenido = contenidoComentario,
-                Fecha = DateTime.UtcNow,
-                UsuarioId = usuarioId,
-                TareaId = tareaId
-            };
+                // Creación de comentario.
+                var comentario = new Comentario
+                {
+                    Contenido = contenidoComentario,
+                    Fecha = DateTime.UtcNow,
+                    UsuarioId = usuarioId,
+                    TareaId = tareaId
+                };
 
-            // Base de datos.
-            await _repoComentario.CrearComentarioAsync(comentario);
-            var guardadoExitoso = await _repoComentario.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Comentario>.Mal("Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
+                // Base de datos.
+                await _repoComentario.CrearComentarioAsync(comentario);
+                await _historialService.RegistrarComentarioAsync(comentario, usuarioId);
+                await _context.SaveChangesAsync();
 
-            // Registrar historial.
-            await _historialService.RegistrarComentarioAsync(comentario, usuarioId);
+                // Commit
+                await transaction.CommitAsync();
 
-            return Result<Comentario>.Bien(comentario);
+                return Result<Comentario>.Bien(comentario);              
+            }
+
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         // Métodos PATCH
@@ -109,22 +126,34 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones.
             if (!await _comentarioPermission.PuedeCambiarComentarioAsync(propiaId, comentario)) return Result<Comentario>.Mal("No puedes modificar este comentario.");
 
-            // Realización de cambios.
-            if(contenidoComentario is not null)
-            {
-                comentario.Contenido = contenidoComentario;
-                numeroCambios += 1;
-            }
-            
-            // Base de datos.
-            if (numeroCambios == 0) return Result<Comentario>.Mal("No se han detectado cambios.");
-            var guardadoExitoso = await _repoComentario.GuardarCambiosAsync();
-            if(!guardadoExitoso) return Result<Comentario>.Mal("Fallo inesperado al guardar el comentario. Inténtalo de nuevo más tarde.");
+            // Transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            // Registrar historial.
-            await _historialService.ModificarComentarioAsync(comentario, propiaId);
-            
-            return Result<Comentario>.Bien(comentario);
+            try
+            {
+                // Realización de cambios.
+                if(contenidoComentario is not null)
+                {
+                    comentario.Contenido = contenidoComentario;
+                    numeroCambios += 1;
+                }
+
+                // Base de datos.
+                if (numeroCambios == 0) return Result<Comentario>.Mal("No se han detectado cambios.");
+                await _historialService.ModificarComentarioAsync(comentario, propiaId);
+                await _context.SaveChangesAsync();
+
+                // Commit
+                await transaction.CommitAsync();
+
+                return Result<Comentario>.Bien(comentario);              
+            }
+
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

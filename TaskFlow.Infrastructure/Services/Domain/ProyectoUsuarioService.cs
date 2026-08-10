@@ -3,6 +3,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Enums;
 using TaskFlow.Core.Repositories;
+using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -12,16 +13,19 @@ namespace TaskFlow.Infrastructure.Services
         private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
         private readonly IProyectoPermissionService _proyectoPermission;
         private readonly IHistorialService _historialService;
+        private readonly TaskFlowDbContext _context;
 
         public ProyectoUsuarioService(
             IProyectoUsuarioRepository repoProyectoUsuario,
             IProyectoPermissionService proyectoPermission,
-            IHistorialService historialService
+            IHistorialService historialService,
+            TaskFlowDbContext context
         )
         {
             _repoProyectoUsuario = repoProyectoUsuario;
             _proyectoPermission = proyectoPermission;
             _historialService = historialService;
+            _context = context;
         }
 
         // Peticiones GET
@@ -55,24 +59,37 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones.
             if (!await _proyectoPermission.PuedeAñadirPersonasAsync(proyectoId, usuarioId, propiaId)) return Result<ProyectoUsuario>.Mal("No puedes añadir este usuario al proyecto.");
             
-            // Creación de usuario nuevo.
-            var usuario = new ProyectoUsuario
+            // Transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                UsuarioId = usuarioId,
-                FechaIncorporacion = DateTime.UtcNow,
-                ProyectoId = proyectoId,
-                Rol = rolUsuario,
-                Activo = true // El usuario se crea activo por defecto
-            };
+                // Creación de usuario nuevo.
+                var usuario = new ProyectoUsuario
+                {
+                    UsuarioId = usuarioId,
+                    FechaIncorporacion = DateTime.UtcNow,
+                    ProyectoId = proyectoId,
+                    Rol = rolUsuario,
+                    Activo = true // El usuario se crea activo por defecto
+                };
 
-            // Base de datos.
-            await _repoProyectoUsuario.CrearUsuarioAsync(usuario);
-            var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
-            if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
+                // Base de datos.
+                await _repoProyectoUsuario.CrearUsuarioAsync(usuario);
+                await _historialService.AñadirPersonaProyectoAsync(proyectoId, propiaId);
+                await _context.SaveChangesAsync();
 
-            await _historialService.AñadirPersonaProyectoAsync(proyectoId, propiaId);
+                // Cmomit
+                await transaction.CommitAsync();
 
-            return Result<ProyectoUsuario>.Bien(usuario);
+                return Result<ProyectoUsuario>.Bien(usuario);               
+            }
+
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         //Petición PATCH
@@ -93,26 +110,39 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones
             if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyectoId, propiaId)) return Result<ProyectoUsuario>.Mal("No puedes modificar los usuarios de este proyecto.");
 
-            // Realización de cambios.
-            if (activoUsuario.HasValue)
+            // Transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                usuario.Activo = activoUsuario.Value;
-                numeroCambios += 1;    
+                 // Realización de cambios.
+                if (activoUsuario.HasValue)
+                {
+                    usuario.Activo = activoUsuario.Value;
+                    numeroCambios += 1;    
+                }
+                if (rolUsuario.HasValue)
+                {
+                    usuario.Rol = rolUsuario.Value;
+                    numeroCambios += 1;   
+                }
+
+                // Base de datos.
+                if (numeroCambios == 0) return Result<ProyectoUsuario>.Mal("No se encontraron cambios");
+                await _historialService.ModificarPersonaProyectoAsync(proyectoId, propiaId);
+                await _context.SaveChangesAsync();
+
+                // Commit
+                await transaction.CommitAsync();
+
+                return Result<ProyectoUsuario>.Bien(usuario);              
             }
-            if (rolUsuario.HasValue)
+
+            catch
             {
-                usuario.Rol = rolUsuario.Value;
-                numeroCambios += 1;   
+                await transaction.RollbackAsync();
+                throw;
             }
-
-            // Base de datos.
-            if (numeroCambios == 0) return Result<ProyectoUsuario>.Mal("No se han detectado cambios para realizar.");
-            var guardadoExistoso = await _repoProyectoUsuario.GuardarCambiosAsync();
-            if (!guardadoExistoso) return Result<ProyectoUsuario>.Mal("Fallo inesperado al guardar los camibos. Inténtalo de nuevo más tarde.");
-
-            await _historialService.ModificarPersonaProyectoAsync(proyectoId, propiaId);
-
-            return Result<ProyectoUsuario>.Bien(usuario);
         }
     }
 }

@@ -33,12 +33,6 @@ namespace TaskFlow.Infrastructure.Repositories
         }
 
         // Misc.
-        // Guardar
-        public async Task <bool> GuardarCambiosAsync()
-        {
-            return (await _context.SaveChangesAsync()) > 0;
-        }
-
         // Comprobar una relacion.
         public async Task <bool> ExisteRelacionAsync(int tareaId, int etiquetaId)
         {

@@ -3,6 +3,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Enums;
+using TaskFlow.Infrastructure.Data;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -13,18 +14,22 @@ namespace TaskFlow.Infrastructure.Services
         private readonly IUsuarioRepository _repoUsuario;
         private readonly IProyectoPermissionService _proyectoPermission;
         private readonly IHistorialService _historialService;
+        private readonly TaskFlowDbContext _context;
 
         public ProyectoService(
             IProyectoRepository repoProyecto,
             IUsuarioRepository repoUsuario,
             IProyectoPermissionService proyectoPermission,
-            IHistorialService historialService
+            IHistorialService historialService,
+            TaskFlowDbContext context
+
         )
         {
             _repoProyecto = repoProyecto;
             _repoUsuario = repoUsuario;
             _proyectoPermission = proyectoPermission;
             _historialService = historialService;
+            _context = context;
         }
 
         // Métodos GET
@@ -72,8 +77,7 @@ namespace TaskFlow.Infrastructure.Services
             };
 
             await _repoProyecto.CrearProyectoAsync(proyecto);
-            var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
-            if (!guardadoExistoso) return Result<Proyecto>.Mal("Fallo inesperado al guardar el usuario. Inténtalo de nuevo más tarde.");
+            await _context.SaveChangesAsync();
 
             return Result<Proyecto>.Bien(proyecto);
         }
@@ -95,23 +99,38 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones
             if (!await _proyectoPermission.PuedeModificarProyectoAsync(proyecto.Id, propiaId)) return Result<Proyecto>.Mal("no puedes modificar el proyecto.");
             
-            if (nombreProyecto is not null)
-            {
-                proyecto.Nombre = nombreProyecto;
-                numeroCambios += 1;
-            } 
-            if (descripcionProyecto is not null)
-            {
-                proyecto.Descripcion = descripcionProyecto;
-                numeroCambios += 1;
-            } 
+            // Transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            if (numeroCambios == 0) return Result<Proyecto>.Mal("No se han detectado cambios.");
-            var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
-            if (!guardadoExistoso) return Result<Proyecto>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-            await _historialService.ModificarProyectoAsync(proyecto, propiaId);
+            try
+            {
+                // Cambios
+                if (nombreProyecto is not null)
+                {
+                    proyecto.Nombre = nombreProyecto;
+                    numeroCambios += 1;
+                } 
+                if (descripcionProyecto is not null)
+                {
+                    proyecto.Descripcion = descripcionProyecto;
+                    numeroCambios += 1;
+                } 
 
-            return Result<Proyecto>.Bien(proyecto);
+                if (numeroCambios == 0) return Result<Proyecto>.Mal("No se han detectado cambios.");
+                await _historialService.ModificarProyectoAsync(proyecto, propiaId);
+                await _context.SaveChangesAsync();
+
+                // Commit
+                await transaction.CommitAsync();
+
+                return Result<Proyecto>.Bien(proyecto);
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;    
+            }
+
         }
 
         // Pasar la posesión del proyecto a otra persona.
@@ -132,25 +151,39 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones de proyecto.
             if (!await _proyectoPermission.PuedesTransferirProyectoAsync(proyecto, usuarioNuevo, propiaId)) return Result<Proyecto>.Mal("No puedes transferir el proyecto a esta persona.");
 
-            // Cambiamos los roles del nuevo propietario y del antiguo.
-            var propietarioActual = proyecto.Usuarios
-                .First(x => x.UsuarioId == proyectoId);
-            var nuevoPropietario = proyecto.Usuarios
-                .First(x => x.UsuarioId == propietarioNuevoId);
+            // Transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            propietarioActual.Rol = RolProyecto.Administrador;
-            nuevoPropietario.Rol = RolProyecto.Manager;
+            try
+            {
+                // Cambiamos los roles del nuevo propietario y del antiguo.
+                var propietarioActual = proyecto.Usuarios
+                    .First(x => x.UsuarioId == propiaId);
+                var nuevoPropietario = proyecto.Usuarios
+                    .First(x => x.UsuarioId == propietarioNuevoId);
 
-            // Cambiamos el ID en el FK.
-            proyecto.PropietarioId = propietarioNuevoId;           
-            
-            // Base de datos
-            var guardadoExistoso = await _repoProyecto.GuardarCambiosASync();
-            if (!guardadoExistoso) return Result<Proyecto>.Mal("ERROR. Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
+                propietarioActual.Rol = RolProyecto.Administrador;
+                nuevoPropietario.Rol = RolProyecto.Manager;
 
-            await _historialService.ModificarDueñoProyectoAsync(proyecto, propiaId);
+                // Cambiamos el ID en el FK.
+                proyecto.PropietarioId = propietarioNuevoId;           
+                
+                // Base de datos
+                await _historialService.ModificarDueñoProyectoAsync(proyecto, propiaId);
+                await _context.SaveChangesAsync();
 
-            return Result<Proyecto>.Bien(proyecto);
+                //Commit
+                await transaction.CommitAsync();
+
+                return Result<Proyecto>.Bien(proyecto);              
+            }
+
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
         }
     }
 }

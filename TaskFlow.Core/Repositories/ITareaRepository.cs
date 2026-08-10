@@ -14,8 +14,6 @@ namespace TaskFlow.Core.Repositories
 
         // POST
         Task CrearTareaAsync(Tarea tarea);
-
-        // Misc.
-        Task<bool> GuardarCambiosAsync();
+        
     }
 }

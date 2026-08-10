@@ -11,8 +11,5 @@ namespace TaskFlow.Core.Repositories
 
         // POST
         Task CrearHistorialAsync(Historial historial);
-
-        // Misc.
-        Task <bool> GuardarCambiosAsync();
     }
 }

@@ -11,11 +11,11 @@ namespace TaskFlow.Infrastructure.Services
     public class TareaService : ITareaService
     {
         // Inyección de repositorios
-        private readonly TaskFlowDbContext _context;
         private readonly ITareaRepository _repoTarea;
         private readonly ITareaEtiquetaService _tareaEtiquetaService;
         private readonly ITareaPermissionService _tareaPermissions;
         private readonly IHistorialService _historialService;
+        private readonly TaskFlowDbContext _context;
 
         public TareaService(
             ITareaRepository repoTarea,
@@ -128,7 +128,6 @@ namespace TaskFlow.Infrastructure.Services
 
             catch
             {   
-                // Si algo falla ROLLBACK
                 await transaction.RollbackAsync();
                 throw;
             }   
@@ -154,48 +153,60 @@ namespace TaskFlow.Infrastructure.Services
             // Comprobaciones.
             if (!await _tareaPermissions.PuedeModificarTareasAsync(propiaId, tarea)) return Result<Tarea>.Mal("No puedes modificar la tarea.");
 
-            // Realizar cambios.
-            if (tituloTarea is not null)
+            // Creación de la transacción
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                tarea.Titulo = tituloTarea;
-                numeroCambios += 1;
-            }
-            if (descripcionTarea is not null)
-            {
-                tarea.Descripcion = descripcionTarea;
-                numeroCambios += 1;
-            }
-            if (prioridadTareaTarea.HasValue)
-            {
-                tarea.Prioridad = prioridadTareaTarea.Value;
-                numeroCambios += 1; 
-            }
-            if (fechaLimiteTarea.HasValue)
-            {
-                tarea.FechaLimite = fechaLimiteTarea.Value;
-                numeroCambios += 1; 
+               // Realizar cambios.
+                if (tituloTarea is not null)
+                {
+                    tarea.Titulo = tituloTarea;
+                    numeroCambios += 1;
+                }
+                if (descripcionTarea is not null)
+                {
+                    tarea.Descripcion = descripcionTarea;
+                    numeroCambios += 1;
+                }
+                if (prioridadTareaTarea.HasValue)
+                {
+                    tarea.Prioridad = prioridadTareaTarea.Value;
+                    numeroCambios += 1; 
+                }
+                if (fechaLimiteTarea.HasValue)
+                {
+                    tarea.FechaLimite = fechaLimiteTarea.Value;
+                    numeroCambios += 1; 
+                }
+
+                // Procesamos las etiquetas.
+                if (etiquetas.Any())
+                {
+                    var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
+                    if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
+
+                    var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
+                    if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+
+                    if (asignarEtiquetas.EsCorrecto && comprobarEtiquetas.EsCorrecto) numeroCambios += 1;
+                }
+                // Base de datos.
+                if (numeroCambios == 0) return Result<Tarea>.Mal("No se han detectado cambios.");
+                await _historialService.ModificarTareaAsync(tarea, propiaId); 
+                await _context.SaveChangesAsync();
+
+                // Commit de la transacción.
+                await transaction.CommitAsync();
+
+                return Result<Tarea>.Bien(tarea);
             }
 
-            // Procesamos las etiquetas.
-            if (etiquetas.Any())
+            catch
             {
-                var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
-                if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
-
-                var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
-                if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
-
-                numeroCambios += 1;
+                await transaction.RollbackAsync();
+                throw;
             }
-            
-            // Base de datos.
-            if (numeroCambios == 0) return Result<Tarea>.Mal("No se han detectado cambios.");
-            var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-            
-            await _historialService.ModificarTareaAsync(tarea, propiaId);
-
-            return Result<Tarea>.Bien(tarea);
         }
 
         // Modificar el estado de una tarea.
@@ -211,18 +222,29 @@ namespace TaskFlow.Infrastructure.Services
 
             // Comrpobaciones.
             if (!await _tareaPermissions.PuedeModificarEstadoTareaAsync(propiaId, tarea)) return Result<Tarea>.Mal("No puedes modificar el estado de una tarea.");
-
-            // Realizamos cambios
-            tarea.Estado = estadoTareaTarea;
-
-            // Base de datos
-            var guardadoExitoso = await _repoTarea.GuardarCambiosAsync();
-            if (!guardadoExitoso) return Result<Tarea>.Mal("Fallo inesperado al guardar los cambios. Inténtalo de nuevo más tarde.");
-
-            await _historialService.ModificarEstadoTareaAsync(tarea, propiaId);
             
-            return Result<Tarea>.Bien(tarea);
+            // Transación
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Realizamos cambios
+                tarea.Estado = estadoTareaTarea;    
+               
+                // Base de datos
+                await _historialService.ModificarEstadoTareaAsync(tarea, propiaId);
+                await _context.SaveChangesAsync();
+                
+                // Commit
+                await transaction.CommitAsync();
 
+                return Result<Tarea>.Bien(tarea);          
+            }
+
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

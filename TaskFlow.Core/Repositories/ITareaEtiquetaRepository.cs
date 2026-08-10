@@ -13,7 +13,6 @@ namespace TaskFlow.Core.Repositories
         Task CrearTareaEtiquetaAsync(TareaEtiqueta tareaEtiqueta);
 
         // Misc.
-        Task <bool> GuardarCambiosAsync();
         Task <bool> ExisteRelacionAsync(int tareaId, int etiquetaId);
     }
 }

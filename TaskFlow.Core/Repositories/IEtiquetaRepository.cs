@@ -12,8 +12,5 @@ namespace TaskFlow.Core.Repositories
 
         // POST
         Task CrearEtiquetaAsync(Etiqueta etiqueta);
-
-        // Misc.
-        Task <bool> GuardarCambiosAsync();
     }
 }

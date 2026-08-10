@@ -11,16 +11,18 @@ namespace TaskFlow.Infrastructure.Services
         // Inyección del repositorio
         private readonly IHistorialRepository _repoHistorial;
 
-        public HistorialService(IHistorialRepository repoHistorial)
+        public HistorialService(
+            IHistorialRepository repoHistorial 
+        )
         {
             _repoHistorial = repoHistorial;
         }
 
         // Peticiones GET
         // Obtener el historial. Útil para mostrar el historial de cambios que ha sufrido un proyecto.
-        public async Task<Result<IEnumerable<Historial>>> GetHistorialAsync(int TareaId)
+        public async Task<Result<IEnumerable<Historial>>> GetHistorialAsync(int proyectoId)
         {
-            var historial = await _repoHistorial.ObtenerHistorialAsync(TareaId);
+            var historial = await _repoHistorial.ObtenerHistorialAsync(proyectoId);
             if (!historial.Any()) return Result<IEnumerable<Historial>>.Mal("La tarea no tiene cambios realizados.");
 
             return Result<IEnumerable<Historial>>.Bien(historial);
@@ -41,7 +43,7 @@ namespace TaskFlow.Infrastructure.Services
             };
 
             await _repoHistorial.CrearHistorialAsync(historial);
-            await _repoHistorial.GuardarCambiosAsync();
+            // No guarda cambios. El servicio que lo llame guardará los cambios.
         }
 
         // Registrar un comentario
