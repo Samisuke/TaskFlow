@@ -114,7 +114,7 @@ namespace TaskFlow.Api.Controllers
                 }));
             }
 
-            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            int idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var proyectoNuevo = await _proyectoService.PostProyectoAsync(
                 proyectoDto.Nombre,
                 proyectoDto.Descripcion,

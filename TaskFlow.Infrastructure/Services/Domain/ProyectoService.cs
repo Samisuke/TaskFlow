@@ -5,6 +5,7 @@ using TaskFlow.Core.Services;
 using TaskFlow.Core.Enums;
 using TaskFlow.Infrastructure.Data;
 
+
 namespace TaskFlow.Infrastructure.Services
 {
     public class ProyectoService : IProyectoService
@@ -15,13 +16,15 @@ namespace TaskFlow.Infrastructure.Services
         private readonly IProyectoPermissionService _proyectoPermission;
         private readonly IHistorialService _historialService;
         private readonly TaskFlowDbContext _context;
+        private readonly IProyectoUsuarioRepository _repoProyectoUsuario;
 
         public ProyectoService(
             IProyectoRepository repoProyecto,
             IUsuarioRepository repoUsuario,
             IProyectoPermissionService proyectoPermission,
             IHistorialService historialService,
-            TaskFlowDbContext context
+            TaskFlowDbContext context,
+            IProyectoUsuarioRepository repoProyectoUsuario
 
         )
         {
@@ -30,6 +33,7 @@ namespace TaskFlow.Infrastructure.Services
             _proyectoPermission = proyectoPermission;
             _historialService = historialService;
             _context = context;
+            _repoProyectoUsuario = repoProyectoUsuario;
         }
 
         // Métodos GET
@@ -68,19 +72,47 @@ namespace TaskFlow.Infrastructure.Services
             int propietarioId
         )
         {
-            var proyecto = new Proyecto
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
-                Nombre = nombreProyecto,
-                Descripcion = descripcionProyecto,
-                FechaCreacion = DateTime.UtcNow,
-                PropietarioId = propietarioId
-            };
+                var proyecto = new Proyecto
+                {
+                    Nombre = nombreProyecto,
+                    Descripcion = descripcionProyecto,
+                    FechaCreacion = DateTime.UtcNow,
+                    PropietarioId = propietarioId
+                };
+                await _repoProyecto.CrearProyectoAsync(proyecto);
 
-            await _repoProyecto.CrearProyectoAsync(proyecto);
-            await _context.SaveChangesAsync();
+                // Creación del prefil dentro del proyecto
+                var proyectoUsuario = new ProyectoUsuario
+                {
+                    UsuarioId = propietarioId,
+                    FechaIncorporacion = DateTime.UtcNow,
+                    Proyecto = proyecto,
+                    Rol = RolProyecto.Manager,
+                    Activo = true
+                };
+                await _repoProyectoUsuario.CrearUsuarioAsync(proyectoUsuario); 
+                
+                await _context.SaveChangesAsync();
 
-            return Result<Proyecto>.Bien(proyecto);
-        }
+                var proyectoCompleto = await _repoProyecto.ObtenerProyectoPorIdAsync(proyecto.Id);
+                if (proyectoCompleto is null) return Result<Proyecto>.Mal("No se ha podido recuperar el proyecto creado.");
+
+                // Commit
+                await transaction.CommitAsync();
+
+                return Result<Proyecto>.Bien(proyectoCompleto);            
+            }
+
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        } 
 
         // Métodos PATCH
         // Modificaciones del proyecto generales.

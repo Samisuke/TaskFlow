@@ -29,11 +29,16 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync(); 
         }
 
-        // Proyectos simples de un creador, sin informacion adicional.
+        // Proyectos simples de un creador.
         public async Task <IEnumerable<Proyecto>> ObtenerProyectosDeUnCreadorAsync(int idCreador)
         {
             return await _context.Proyectos
                 .Where(x => x.PropietarioId == idCreador)
+                .Include(x => x.Tareas)
+                    .ThenInclude(x => x.Etiquetas)
+                        .ThenInclude(x => x.Etiqueta)
+                .Include(x => x.Usuarios)
+                    .ThenInclude(x => x.Usuario)
                 .ToListAsync();
         }
 
@@ -41,7 +46,12 @@ namespace TaskFlow.Infrastructure.Repositories
         public async Task <Proyecto?> ObtenerProyectoPorIdAsync(int idProyecto)
         {
             return await _context.Proyectos
+            .Include(x => x.Propietario)
             .Include(x => x.Usuarios)
+                .ThenInclude(x => x.Usuario)
+            .Include(x => x.Tareas)
+                .ThenInclude(x => x.Etiquetas)
+                    .ThenInclude(x => x.Etiqueta)
             .FirstOrDefaultAsync(x => x.Id == idProyecto);
         }
 
