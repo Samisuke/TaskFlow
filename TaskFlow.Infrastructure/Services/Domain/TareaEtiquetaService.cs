@@ -34,8 +34,9 @@ namespace TaskFlow.Infrastructure.Services
         // Misc.
         // Comprobamos si una etiqueta ya existe con un nombre y color que recibimos de la tarea. Si existe, devolvemos esa etiqueta.
         // Si no existe, la creamos.
-        public async Task<Result> ComprobarSiEtiquetaExisteOCrearASync(IEnumerable<NuevaEtiqueta> etiquetas)
+        public async Task<Result<List<Etiqueta>>> ComprobarSiEtiquetaExisteOCrearASync(IEnumerable<NuevaEtiqueta> etiquetas)
         {
+            List<Etiqueta> listaEtiquetas = [];
             // Comprobamos cada elemento de la lista
             foreach (var nuevaEtiqueta in etiquetas)
             {
@@ -54,33 +55,28 @@ namespace TaskFlow.Infrastructure.Services
                     // La metemos en la base de datos.
                     await _repoEtiqueta.CrearEtiquetaAsync(etiqueta);
                 }
+
+                listaEtiquetas.Add(etiqueta);
             }
 
             // Return sin guardar cambios porque el servicio lo guarda todo mediante la transacción
-            return Result.Bien();   
+            return Result<List<Etiqueta>>.Bien(listaEtiquetas);   
         }
 
         // Asignar etiquetas a una tarea concreta. Separado de la comprobación para mantener
         // las responsabilidades separadas y construir métodos escalables.
         public async Task<Result> AsignarEtiquetaATareaASync(
             Tarea tarea,
-            IEnumerable<NuevaEtiqueta> etiquetas
+            List<Etiqueta> etiquetas
         )
         {
             foreach (var etiqueta in etiquetas)
             {
-                var etiquetaNueva = await _repoEtiqueta.ObtenerEtiquetaPorNombreYColorAsync(etiqueta.Nombre, etiqueta.Color);
-                if (etiquetaNueva is null) return Result.Mal("Error interno.");
-
-                // Comprobación: Que la tarea no tenga ya esta misma etiqueta.
-                bool relacionExiste = await _repoTareaEtiqueta.ExisteRelacionAsync(tarea.Id, etiquetaNueva.Id);
-                if (relacionExiste) continue;
-
                 // Creamos la relación
                 await _repoTareaEtiqueta.CrearTareaEtiquetaAsync(new TareaEtiqueta
                 {
-                    TareaId = tarea.Id,
-                    EtiquetaId = etiquetaNueva.Id
+                    Tarea = tarea,
+                    Etiqueta = etiqueta
                 });          
             }
 

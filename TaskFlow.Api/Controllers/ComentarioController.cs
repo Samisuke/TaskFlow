@@ -60,7 +60,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Obtener un comentario concreto por ID.
-        [HttpGet("{id}")]
+        [HttpGet("{comentarioId}")]
         [Authorize]
         public async Task<ActionResult<ComentarioReadDto>> GetComentario(int comentarioId)
         {
@@ -71,7 +71,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Obtener comentarios de un usuario por ID del usuario.
-        [HttpGet("usuario/{id}")]
+        [HttpGet("usuario/{usuarioId}")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosUsuario(int usuarioId)
         {
@@ -82,7 +82,7 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Obtener todos los comentarios de una tarea.
-        [HttpGet("tarea/{idTarea}")]
+        [HttpGet("tarea/{tareaId}")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosTarea(int tareaId)
         {
@@ -120,9 +120,9 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Modificar un comentario
-        [HttpPatch("{idComentario}")]
+        [HttpPatch("{comentarioId}")]
         [Authorize]
-        public async Task<ActionResult> PatchComentario(int idComentario, [FromBody] ComentarioPatchDto comentarioPatchDto)
+        public async Task<ActionResult> PatchComentario(int comentarioId, [FromBody] ComentarioPatchDto comentarioPatchDto)
         {
             var validationResult = await _validatorPatch.ValidateAsync(comentarioPatchDto);
             if (!validationResult.IsValid)
@@ -137,7 +137,7 @@ namespace TaskFlow.Api.Controllers
             var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var comentario = await _comentarioService.PatchComentarioAsync(
                 idJWT,
-                idComentario,
+                comentarioId,
                 comentarioPatchDto.Contenido!
             );
             if (!comentario.EsCorrecto ||comentario.Valor is null) return BadRequest(comentario.MensajeError); 

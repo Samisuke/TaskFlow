@@ -43,34 +43,34 @@ namespace TaskFlow.Api.Controllers
         }
 
         // Permite ver el perfil de un usuario dentro de un proyecto.
-        [HttpGet("proyecto/{ProyectoId}/usuario/{usuarioId}")]
+        [HttpGet("proyecto/{proyectoId}/usuario/{usuarioId}")]
         [Authorize]
-        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetPerfil(int ProyectoId, int usuarioId)
+        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetPerfil(int proyectoId, int usuarioId)
         {
-            var usuario = await _pUsuarioService.GetUsuarioDeUnProyectoAsync(ProyectoId, usuarioId);
+            var usuario = await _pUsuarioService.GetUsuarioDeUnProyectoAsync(proyectoId, usuarioId);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<ProyectoUsuarioReadDto>());
         }
 
         // Permite ver tu perfil de un usuario dentro de un proyecto.
-        [HttpGet("proyecto/{ProyectoId}/mi-perfil")]
+        [HttpGet("proyecto/{proyectoId}/mi-perfil")]
         [Authorize]
-        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetPerfilPropio(int ProyectoId)
+        public async Task<ActionResult<ProyectoUsuarioReadDto>> GetPerfilPropio(int proyectoId)
         {
             var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var usuario = await _pUsuarioService.GetUsuarioDeUnProyectoAsync(ProyectoId, idJWT);
+            var usuario = await _pUsuarioService.GetUsuarioDeUnProyectoAsync(proyectoId, idJWT);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<ProyectoUsuarioReadDto>());
         }
 
         // Permite ver todos los perfiles de usuario dentro de un proyecto.
-        [HttpGet("proyecto/{ProyectoId}/usuarios")]
+        [HttpGet("proyecto/{proyectoId}/usuarios")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ProyectoUsuarioReadDto>>> GetPerfiles(int ProyectoId)
+        public async Task<ActionResult<IEnumerable<ProyectoUsuarioReadDto>>> GetPerfiles(int proyectoId)
         {
-            var usuario = await _pUsuarioService.GetTodosLosUsuariosDeUnProyectoAsync(ProyectoId);
+            var usuario = await _pUsuarioService.GetTodosLosUsuariosDeUnProyectoAsync(proyectoId);
             if (!usuario.EsCorrecto || usuario.Valor is null) return NotFound(usuario.MensajeError);
 
             return Ok(usuario.Valor.Adapt<IEnumerable<ProyectoUsuarioReadDto>>());

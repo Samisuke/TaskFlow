@@ -20,16 +20,16 @@ namespace TaskFlow.Infrastructure.Services
         }
 
         // Comprueba que pertenezcas al proyecto y estés activo.
-        public async Task<bool> EsMiembroActivoAsync(int idProyecto, int idPropia)
+        public async Task<bool> EsMiembroActivoAsync(int idProyecto, int usuarioId)
         {
-            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idPropia);
+            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, usuarioId);
             return proyectoUsuario is not null && proyectoUsuario.Activo;
         }
 
         // Contiene las comprobaciones para poder modificar un proyecto.
-        public async Task<bool> PuedeModificarProyectoAsync(int idProyecto, int idPropia)
+        public async Task<bool> PuedeModificarProyectoAsync(int idProyecto, int usuarioId)
         {
-            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, idPropia);
+            var proyectoUsuario = await _repoProyectoUsuario.ObtenerUnUsuarioDeUnProyectoAsync(idProyecto, usuarioId);
             
             return proyectoUsuario is not null 
             && proyectoUsuario.Activo

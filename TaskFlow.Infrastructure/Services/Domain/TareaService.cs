@@ -110,10 +110,13 @@ namespace TaskFlow.Infrastructure.Services
                 if (etiquetas.Count > 0)
                 {
                     var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
-                    if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
+                    if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.MensajeError);
 
-                    var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
-                    if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+                    if (comprobarEtiquetas.Valor is not null)
+                    {
+                        var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, comprobarEtiquetas.Valor);
+                        if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+                    }
                 }
                 await _historialService.RegistrarTareaAsync(tarea);
 
@@ -181,15 +184,16 @@ namespace TaskFlow.Infrastructure.Services
                 }
 
                 // Procesamos las etiquetas.
-                if (etiquetas.Any())
+                if (etiquetas.Count > 0)
                 {
                     var comprobarEtiquetas = await _tareaEtiquetaService.ComprobarSiEtiquetaExisteOCrearASync(etiquetas);
-                    if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.Error);
+                    if (!comprobarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(comprobarEtiquetas.MensajeError);
 
-                    var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, etiquetas);
-                    if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
-
-                    if (asignarEtiquetas.EsCorrecto && comprobarEtiquetas.EsCorrecto) numeroCambios += 1;
+                    if (comprobarEtiquetas.Valor is not null)
+                    {
+                        var asignarEtiquetas =  await _tareaEtiquetaService.AsignarEtiquetaATareaASync(tarea, comprobarEtiquetas.Valor);
+                        if (!asignarEtiquetas.EsCorrecto) return Result<Tarea>.Mal(asignarEtiquetas.Error);
+                    }
                 }
                 // Base de datos.
                 if (numeroCambios == 0) return Result<Tarea>.Mal("No se han detectado cambios.");

@@ -14,12 +14,12 @@ namespace TaskFlow.Core.Services
         // Misc.
         // Comprobamos si una etiqueta ya existe con un nombre y color que recibimos de la tarea. Si existe, devolvemos esa etiqueta.
         // Si no existe, la creamos.
-        Task<Result> ComprobarSiEtiquetaExisteOCrearASync(IEnumerable<NuevaEtiqueta> etiquetas);
+        Task<Result<List<Etiqueta>>> ComprobarSiEtiquetaExisteOCrearASync(IEnumerable<NuevaEtiqueta> etiquetas);
 
         // Asignar etiquetas a una tarea concreta
         Task<Result> AsignarEtiquetaATareaASync(
             Tarea tarea,
-            IEnumerable<NuevaEtiqueta> etiquetas
+            List<Etiqueta> etiquetas
         );
     }
 }
