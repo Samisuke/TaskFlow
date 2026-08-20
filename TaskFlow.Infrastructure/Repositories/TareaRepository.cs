@@ -20,7 +20,10 @@ namespace TaskFlow.Infrastructure.Repositories
         {
             return await _context.Tareas
                 .Include(t => t.Proyecto)
+                .Include(t => t.Asignado)
                 .Include(t => t.Creador)
+                .Include(t => t.Etiquetas)
+                    .ThenInclude(te => te.Etiqueta)
                 .Where(t => t.AsignadoId == idUsuario)
                 .ToListAsync();
         }
@@ -31,6 +34,9 @@ namespace TaskFlow.Infrastructure.Repositories
               return await _context.Tareas
                 .Include(t => t.Proyecto)
                 .Include(t => t.Asignado)
+                .Include(t => t.Creador)
+                .Include(t => t.Etiquetas)
+                    .ThenInclude(te => te.Etiqueta)
                 .Where(t => t.CreadorId == idUsuario)
                 .ToListAsync();          
         }
@@ -39,8 +45,11 @@ namespace TaskFlow.Infrastructure.Repositories
         public async Task <IEnumerable<Tarea>> ObtenerTareasDeUnProyectoAsync(int idProyecto)
         {
             return await _context.Tareas
+                .Include(t => t.Proyecto)
                 .Include(t => t.Creador)
                 .Include(t => t.Asignado)
+                .Include(t => t.Etiquetas)
+                    .ThenInclude(te => te.Etiqueta)
                 .Where(t => t.ProyectoId == idProyecto)
                 .ToListAsync();         
         }
@@ -52,6 +61,8 @@ namespace TaskFlow.Infrastructure.Repositories
                 .Include(t => t.Proyecto)
                 .Include(t => t.Creador)
                 .Include(t => t.Asignado)
+                .Include(t => t.Etiquetas)
+                    .ThenInclude(te => te.Etiqueta)
                 .FirstOrDefaultAsync(t => t.Id == idTarea);   
         }
 

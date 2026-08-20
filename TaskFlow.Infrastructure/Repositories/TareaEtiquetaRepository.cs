@@ -25,7 +25,7 @@ namespace TaskFlow.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        // Métodos GET
+        // Métodos POST
         // Asignar etiqueta a una tarea.
         public async Task CrearTareaEtiquetaAsync(TareaEtiqueta tareaEtiqueta)
         {

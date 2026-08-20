@@ -12,6 +12,7 @@ namespace TaskFlow.Core.Dto.Tarea
         public TareaReadDtoUsuarioAsignado Asignado {get; set;} = null!;
         public TareaReadDtoUsuarioCreador Creador {get; set;} = null!;
         public TareaReadDtoProyecto Proyecto {get; set;} = null!;
+        public ICollection<TareaReadDtoEtiquetas> Etiquetas {get; set;} = [];
     }
 
     public class TareaReadDtoUsuarioAsignado
@@ -27,5 +28,10 @@ namespace TaskFlow.Core.Dto.Tarea
     public class TareaReadDtoProyecto
     {
         public string Nombre {get; set;} = string.Empty;
+    }
+        public class TareaReadDtoEtiquetas
+    {
+        public string Nombre {get; set;} = string.Empty;
+        public string Color {get; set;} = string.Empty;
     }
 }

@@ -27,6 +27,13 @@ namespace TaskFlow.Api.Config.MapsterConfig
                 .Map(dest => dest.Nombre,
                 src => src.Nombre);
 
+            TypeAdapterConfig<TareaEtiqueta, TareaReadDtoEtiquetas>
+                .NewConfig()
+                .Map(dest => dest.Nombre,
+                src => src.Etiqueta!.Nombre)
+                .Map(dest => dest.Color,
+                src => src.Etiqueta!.Color);
+
         }   
     }
 }

@@ -44,7 +44,8 @@ namespace TaskFlow.Core.Services
 
             return usuarioPropio is not null && usuarioPropio.Activo
             && (usuarioPropio.Rol == TaskFlow.Core.Enums.RolProyecto.Manager
-            || idPropia == tarea.AsignadoId); 
+            || idPropia == tarea.AsignadoId
+            || idPropia == tarea.CreadorId); 
         }
     }
 }
