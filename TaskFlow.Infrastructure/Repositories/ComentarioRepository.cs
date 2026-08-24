@@ -17,21 +17,45 @@ namespace TaskFlow.Infrastructure.Repositories
         
         // Métodos GET
         // Obtener comentarios de una tarea con información del usuario.
-        public async Task <IEnumerable<Comentario>> ObtenerComentariosDeUnaTareaAsync(int idTarea)
+        public async Task <(IEnumerable<Comentario> Comentarios, int TotalItems)> ObtenerComentariosDeUnaTareaAsync(
+            int tareaId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            return await _context.Comentarios
-                .Where(c => c.TareaId == idTarea)
-                .Include(c => c.Usuario)
+            var query = _context.Comentarios
+                .Where(c => c.TareaId == tareaId)
+                .Include(c => c.Usuario);
+
+            var totalItems = await query.CountAsync();
+            var comentarios = await query
+                .OrderBy(c => c.Id)
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(pagina)
                 .ToListAsync();
+            
+            return (comentarios, totalItems);
         }
 
         // Comentarios de un usuario con información de la tarea.
-        public async Task <IEnumerable<Comentario>> ObtenerComentariosDeUnUsuarioAsync(int idUsuario)
+        public async Task <(IEnumerable<Comentario> Comentarios, int TotalItems)> ObtenerComentariosDeUnUsuarioAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            return await _context.Comentarios
-                .Where(c => c.UsuarioId == idUsuario)
-                .Include(c => c.Tarea)
-                .ToListAsync();      
+            var query = _context.Comentarios
+                .Where(c => c.UsuarioId == usuarioId)
+                .Include(c => c.Tarea);
+
+            var totalItems = await query.CountAsync();
+            var comentarios = await query
+                .OrderBy(c => c.Id)
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(pagina)
+                .ToListAsync();   
+            
+            return (comentarios, totalItems);
         }
 
         // Comentario completo por su ID.

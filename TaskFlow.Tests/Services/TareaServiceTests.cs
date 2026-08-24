@@ -16,13 +16,13 @@ public class TareaServiceTests
     {
         using var context = TestDbContextFactory.Create();
         var repo = Substitute.For<ITareaRepository>();
-        repo.ObtenerTareasPendientesPorUsuarioIdAsync(1).Returns(Array.Empty<Tarea>());
+        repo.ObtenerTareasPendientesPorUsuarioIdAsync(1, 1, 5).Returns((Array.Empty<Tarea>(), 10));
         var sut = CreateSut(context, repo: repo);
 
-        var result = await sut.GetTareasPendientesDeUsuarioAsync(1);
+        var result = await sut.GetTareasPendientesDeUsuarioAsync(1, 1, 5);
 
         Assert.False(result.EsCorrecto);
-        Assert.Equal("No se encuentran tareas pendientes.", result.MensajeError);
+        Assert.Equal("No tienes tareas pendientes.", result.MensajeError);
     }
 
     [Fact]
@@ -31,13 +31,13 @@ public class TareaServiceTests
         using var context = TestDbContextFactory.Create();
         var tasks = new[] { new Tarea { Id = 1 } };
         var repo = Substitute.For<ITareaRepository>();
-        repo.ObtenerTareasDadasPorUsuarioIdAsync(2).Returns(tasks);
+        repo.ObtenerTareasDadasPorUsuarioIdAsync(2, 1, 5).Returns((tasks, 1));
         var sut = CreateSut(context, repo: repo);
 
-        var result = await sut.GetTareasDadasDeUsuarioAsync(2);
+        var result = await sut.GetTareasDadasDeUsuarioAsync(2, 1, 5);
 
         Assert.True(result.EsCorrecto);
-        Assert.Single(result.Valor!);
+        Assert.Single(result.Valor!.Items);
     }
 
     [Fact]

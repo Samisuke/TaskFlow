@@ -47,18 +47,6 @@ namespace TaskFlow.Api.Controllers
             _validatorPatch = validatorPatch;
         }
 
-        // Obtener tus comentarios usando ID del JWT.
-        [HttpGet("mis-comentarios")]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetMisComentarios()
-        {
-            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(idJWT);
-            if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
-
-            return Ok(comentarios.Valor.Adapt<IEnumerable<ComentarioReadDto>>());
-        }
-
         // Obtener un comentario concreto por ID.
         [HttpGet("{comentarioId}")]
         [Authorize]
@@ -70,26 +58,91 @@ namespace TaskFlow.Api.Controllers
             return Ok(comentario.Valor.Adapt<ComentarioReadDto>());
         }
 
+        // Obtener tus comentarios usando ID del JWT.
+        [HttpGet("mis-comentarios")]
+        [Authorize]
+        public async Task<ActionResult<ComentarioReadDto>> GetMisComentarios(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 5
+        )
+        {
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(
+                idJWT,
+                pagina,
+                tamanoPagina
+            );
+            if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
+
+            var resultado = new
+            {
+                Items = comentarios.Valor.Items
+                    .Adapt<IEnumerable<ComentarioReadDto>>(),
+                comentarios.Valor.Pagina,
+                comentarios.Valor.TotalPaginas,
+                comentarios.Valor.TamanoPagina,
+                comentarios.Valor.TotalItems
+            };
+
+            return Ok(resultado);
+        }
+
         // Obtener comentarios de un usuario por ID del usuario.
         [HttpGet("usuario/{usuarioId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosUsuario(int usuarioId)
+        public async Task<ActionResult<ComentarioReadDto>> GetComentariosUsuario(
+            int usuarioId,
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 5
+        )
         {
-            var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(usuarioId);
+            var comentarios = await _comentarioService.GetComentariosDeUnUsuarioAsync(
+                usuarioId,
+                pagina,
+                tamanoPagina
+            );
             if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
 
-            return Ok(comentarios.Valor.Adapt<IEnumerable<ComentarioReadDto>>());
+            var resultado = new
+            {
+                Items = comentarios.Valor.Items
+                    .Adapt<IEnumerable<ComentarioReadDto>>(),
+                comentarios.Valor.Pagina,
+                comentarios.Valor.TotalPaginas,
+                comentarios.Valor.TamanoPagina,
+                comentarios.Valor.TotalItems
+            };
+
+            return Ok(resultado);
         }
 
         // Obtener todos los comentarios de una tarea.
         [HttpGet("tarea/{tareaId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<ComentarioReadDto>>> GetComentariosTarea(int tareaId)
+        public async Task<ActionResult<ComentarioReadDto>> GetComentariosTarea(
+            int tareaId,
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 5
+        )
         {
-            var comentarios = await _comentarioService.GetComentariosDeUnaTareaAsync(tareaId);
+            var comentarios = await _comentarioService.GetComentariosDeUnaTareaAsync(
+                tareaId,
+                pagina,
+                tamanoPagina
+            );
             if (!comentarios.EsCorrecto || comentarios.Valor is null) return NotFound(comentarios.MensajeError);
 
-            return Ok(comentarios.Valor.Adapt<IEnumerable<ComentarioReadDto>>());
+            var resultado = new
+            {
+                Items = comentarios.Valor.Items
+                    .Adapt<IEnumerable<ComentarioReadDto>>(),
+                comentarios.Valor.Pagina,
+                comentarios.Valor.TotalPaginas,
+                comentarios.Valor.TamanoPagina,
+                comentarios.Valor.TotalItems
+            };
+
+            return Ok(resultado);
         }
 
         // Realizar un comentario

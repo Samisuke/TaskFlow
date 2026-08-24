@@ -74,9 +74,9 @@ namespace TaskFlow.Api.Controllers
                 Items = tareas.Valor.Items
                     .Adapt<IEnumerable<TareaReadDto>>(),
                 tareas.Valor.Pagina,
-                tareas.Valor.TotalItems,
+                tareas.Valor.TotalPaginas,
                 tareas.Valor.TamanoPagina,
-                tareas.Valor.TotalPaginas
+                tareas.Valor.TotalItems
             };
 
             return Ok(resultado); 
@@ -106,9 +106,9 @@ namespace TaskFlow.Api.Controllers
                 Items = tareas.Valor.Items
                     .Adapt<IEnumerable<TareaReadDto>>(),
                 tareas.Valor.Pagina,
-                tareas.Valor.TotalItems,
+                tareas.Valor.TotalPaginas,
                 tareas.Valor.TamanoPagina,
-                tareas.Valor.TotalPaginas
+                tareas.Valor.TotalItems
             };
 
             return Ok(resultado); 
@@ -138,9 +138,9 @@ namespace TaskFlow.Api.Controllers
                 Items = tareas.Valor.Items
                     .Adapt<IEnumerable<TareaReadDto>>(),
                 tareas.Valor.Pagina,
-                tareas.Valor.TotalItems,
+                tareas.Valor.TotalPaginas,
                 tareas.Valor.TamanoPagina,
-                tareas.Valor.TotalPaginas
+                tareas.Valor.TotalItems
             };
 
             return Ok(resultado); 

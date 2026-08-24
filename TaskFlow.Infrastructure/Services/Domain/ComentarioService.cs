@@ -3,6 +3,8 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Repositories;
 using TaskFlow.Infrastructure.Data;
+using TaskFlow.Core.Dto.Paginacion;
+using System.Text.RegularExpressions;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -35,21 +37,51 @@ namespace TaskFlow.Infrastructure.Services
         }
         // Métodos GET
         // Obtener los comentarios que ha hecho un usuario. Útil para ver una lsita de comentarios que un usario ha hecho en tu proyecto.
-        public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnUsuarioAsync(int usuarioId)
+        public async Task <Result<PaginatedResult<Comentario>>> GetComentariosDeUnUsuarioAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            var comentarios = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(usuarioId);
-            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("El usuario no tiene comentarios.");
+            var resultado = await _repoComentario.ObtenerComentariosDeUnUsuarioAsync(usuarioId, pagina, tamanoPagina);
+            if (!resultado.Comentarios.Any()) return Result<PaginatedResult<Comentario>>.Mal("El usuario no tiene comentarios.");
 
-            return Result<IEnumerable<Comentario>>.Bien(comentarios);
+            var totalPaginas = (int)Math.Ceiling(resultado.TotalItems / (double)tamanoPagina);
+
+            var paginado = new PaginatedResult<Comentario>
+            {
+                Items = resultado.Comentarios,
+                Pagina = pagina,
+                TotalPaginas = totalPaginas,
+                TotalItems = resultado.TotalItems,
+                TamanoPagina = tamanoPagina
+            };
+
+            return Result<PaginatedResult<Comentario>>.Bien(paginado);
         }
 
         // Obtener todos los comentarios de una tarea. Útil para poner una sección de comentarios.
-        public async Task <Result<IEnumerable<Comentario>>> GetComentariosDeUnaTareaAsync(int tareaID)
+        public async Task <Result<PaginatedResult<Comentario>>> GetComentariosDeUnaTareaAsync(
+            int tareaId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            var comentarios = await _repoComentario.ObtenerComentariosDeUnaTareaAsync(tareaID);
-            if (!comentarios.Any()) return Result<IEnumerable<Comentario>>.Mal("No hay comentarios en esta tarea.");
+            var resultado = await _repoComentario.ObtenerComentariosDeUnaTareaAsync(tareaId, pagina, tamanoPagina);
+            if (!resultado.Comentarios.Any()) return Result<PaginatedResult<Comentario>>.Mal("No hay comentarios en esta tarea.");
 
-            return Result<IEnumerable<Comentario>>.Bien(comentarios);
+            var totalPaginas = (int)Math.Ceiling(resultado.TotalItems / (double)tamanoPagina);
+
+            var paginado = new PaginatedResult<Comentario>
+            {
+                Items = resultado.Comentarios,
+                Pagina = pagina,
+                TotalPaginas = totalPaginas,
+                TotalItems = resultado.TotalItems,
+                TamanoPagina = tamanoPagina
+            };
+
+            return Result<PaginatedResult<Comentario>>.Bien(paginado);
         }
 
         // Obtener un comentario concreto. Útil si quieres poder entrar en el comentario.

@@ -16,14 +16,14 @@ public class ComentarioServiceTests
 
         var repo = Substitute.For<IComentarioRepository>();
 
-        repo.ObtenerComentariosDeUnUsuarioAsync(1)
-            .Returns(Array.Empty<Comentario>());
+        repo.ObtenerComentariosDeUnUsuarioAsync(1, 1, 5)
+            .Returns((Array.Empty<Comentario>(), 10));
 
         var sut = CreateSut(
             context,
             repoComentario: repo);
 
-        var result = await sut.GetComentariosDeUnUsuarioAsync(1);
+        var result = await sut.GetComentariosDeUnUsuarioAsync(1, 1, 5);
 
         Assert.False(result.EsCorrecto);
         Assert.Equal(
@@ -38,20 +38,23 @@ public class ComentarioServiceTests
 
         var repo = Substitute.For<IComentarioRepository>();
 
-        repo.ObtenerComentariosDeUnaTareaAsync(10)
-            .Returns(new[]
-            {
-                new Comentario { Id = 1 }
-            });
+        repo.ObtenerComentariosDeUnaTareaAsync(10, 1, 5)
+            .Returns((
+                new[]
+                {
+                    new Comentario { Id = 1 }
+                },
+                1
+            ));
 
         var sut = CreateSut(
             context,
             repoComentario: repo);
 
-        var result = await sut.GetComentariosDeUnaTareaAsync(10);
+        var result = await sut.GetComentariosDeUnaTareaAsync(10, 1, 5);
 
         Assert.True(result.EsCorrecto);
-        Assert.Single(result.Valor!);
+        Assert.Single(result.Valor!.Items);
     }
 
     [Fact]
