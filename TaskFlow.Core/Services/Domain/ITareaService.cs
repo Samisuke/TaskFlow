@@ -2,6 +2,7 @@ using TaskFlow.Core.Common;
 using TaskFlow.Core.Models;
 using TaskFlow.Core.Enums;
 using TaskFlow.Core.Requests;
+using TaskFlow.Core.Dto.Paginacion;
 
 // Define la lógica de negocio relacionada con las tareas.
 
@@ -10,9 +11,20 @@ namespace TaskFlow.Core.Services
     public interface ITareaService
     {
         // Métodos GET
-        Task <Result<IEnumerable<Tarea>>> GetTareasPendientesDeUsuarioAsync(int usuarioId);
-        Task <Result<IEnumerable<Tarea>>> GetTareasDadasDeUsuarioAsync(int usuarioId);
-        Task <Result<IEnumerable<Tarea>>> GetTareasDeUnProyectoAsync(int usuarioId);
+        Task <Result<PaginatedResult<Tarea>>> GetTareasPendientesDeUsuarioAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina);
+        Task <Result<PaginatedResult<Tarea>>>  GetTareasDadasDeUsuarioAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        );
+        Task <Result<PaginatedResult<Tarea>>> GetTareasDeUnProyectoAsync(
+            int proyectoId,
+            int pagina,
+            int tamanoPagina
+        );
         Task <Result<Tarea?>> GetTareaPorIdAsync(int tareaId);
 
         // Métodos POST

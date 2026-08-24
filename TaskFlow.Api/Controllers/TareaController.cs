@@ -53,36 +53,97 @@ namespace TaskFlow.Api.Controllers
         // Obtener las tareas pertenecientes a un proyecto.
         [HttpGet("proyecto/{proyectoId}/tareas")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetTareasProyecto(int proyectoId)
+        public async Task<ActionResult> GetTareasProyecto(
+            int proyectoId,
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 5
+        )
         {
-            var tareas = await _tareaService.GetTareasDeUnProyectoAsync(proyectoId);
+            if (pagina < 1) return BadRequest("La página debe ser mayor o igual a 1.");
+            if (tamanoPagina < 1 || tamanoPagina > 100) return BadRequest("El tamaño de página debe estar entre 1 y 100.");
+
+            var tareas = await _tareaService.GetTareasDeUnProyectoAsync(
+                proyectoId,
+                pagina,
+                tamanoPagina
+            );
             if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
 
-            return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
+            var resultado = new
+            {
+                Items = tareas.Valor.Items
+                    .Adapt<IEnumerable<TareaReadDto>>(),
+                tareas.Valor.Pagina,
+                tareas.Valor.TotalItems,
+                tareas.Valor.TamanoPagina,
+                tareas.Valor.TotalPaginas
+            };
+
+            return Ok(resultado); 
         }
 
         // Obtener las tareas pendientes propias.
         [HttpGet("mis-tareas-pendientes")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetMisTareasPendientes()
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetMisTareasPendientes(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 5
+        )
         {
+            if (pagina < 1) return BadRequest("La página debe ser mayor o igual a 1.");
+            if (tamanoPagina < 1 || tamanoPagina > 100) return BadRequest("El tamaño de página debe estar entre 1 y 100.");
+
             var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var tareas = await _tareaService.GetTareasPendientesDeUsuarioAsync(idJWT);
+            var tareas = await _tareaService.GetTareasPendientesDeUsuarioAsync(
+                idJWT,
+                pagina,
+                tamanoPagina
+            );
             if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
 
-            return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
+            var resultado = new
+            {
+                Items = tareas.Valor.Items
+                    .Adapt<IEnumerable<TareaReadDto>>(),
+                tareas.Valor.Pagina,
+                tareas.Valor.TotalItems,
+                tareas.Valor.TamanoPagina,
+                tareas.Valor.TotalPaginas
+            };
+
+            return Ok(resultado); 
         }
         
         // Obtener las tareas asignadas propias.
         [HttpGet("mis-tareas-asignadas")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetMisTareasAsignadas() 
+        public async Task<ActionResult<IEnumerable<TareaReadDto>>> GetMisTareasAsignadas(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 5
+        ) 
         {
-            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var tareas = await _tareaService.GetTareasDadasDeUsuarioAsync(idJWT);
-            if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
+            if (pagina < 1) return BadRequest("La página debe ser mayor o igual a 1.");
+            if (tamanoPagina < 1 || tamanoPagina > 100) return BadRequest("El tamaño de página debe estar entre 1 y 100.");
 
-            return Ok(tareas.Valor.Adapt<IEnumerable<TareaReadDto>>()); 
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var tareas = await _tareaService.GetTareasDadasDeUsuarioAsync(
+                idJWT,
+                pagina,
+                tamanoPagina
+            );
+            if(!tareas.EsCorrecto || tareas.Valor is null) return NotFound(tareas.MensajeError);
+            
+            var resultado = new
+            {
+                Items = tareas.Valor.Items
+                    .Adapt<IEnumerable<TareaReadDto>>(),
+                tareas.Valor.Pagina,
+                tareas.Valor.TotalItems,
+                tareas.Valor.TamanoPagina,
+                tareas.Valor.TotalPaginas
+            };
+
+            return Ok(resultado); 
         }
 
         // Obtener una tarea por su ID.

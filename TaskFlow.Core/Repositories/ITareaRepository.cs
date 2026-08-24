@@ -7,9 +7,21 @@ namespace TaskFlow.Core.Repositories
     public interface ITareaRepository
     {
         // GET
-        Task <IEnumerable<Tarea>> ObtenerTareasPendientesPorUsuarioIdAsync(int usuarioId);
-        Task <IEnumerable<Tarea>> ObtenerTareasDadasPorUsuarioIdAsync(int usuarioId);
-        Task <IEnumerable<Tarea>> ObtenerTareasDeUnProyectoAsync(int proyectoId);
+        Task <(IEnumerable<Tarea> Tareas, int TotalITems)> ObtenerTareasPendientesPorUsuarioIdAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        );
+        Task <(IEnumerable<Tarea> Tareas, int TotalITems)> ObtenerTareasDadasPorUsuarioIdAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        );
+        Task <(IEnumerable<Tarea> Tareas, int TotalITems)> ObtenerTareasDeUnProyectoAsync(
+            int proyectoId,
+            int pagina,
+            int tamanoPagina
+        );
         Task <Tarea?> ObtenerTareaPorIdAsync(int tareaId);
 
         // POST

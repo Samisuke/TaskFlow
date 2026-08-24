@@ -5,6 +5,7 @@ using TaskFlow.Core.Repositories;
 using TaskFlow.Core.Services;
 using TaskFlow.Core.Requests;
 using TaskFlow.Infrastructure.Data;
+using TaskFlow.Core.Dto.Paginacion;
 
 namespace TaskFlow.Infrastructure.Services
 {
@@ -34,30 +35,75 @@ namespace TaskFlow.Infrastructure.Services
 
         // Métodos GET
         // Obtener tus propias tareas pendientes. Útil para ver desde tu perfil que tienes por hacer.
-        public async Task <Result<IEnumerable<Tarea>>> GetTareasPendientesDeUsuarioAsync(int usuarioId)
+        public async Task<Result<PaginatedResult<Tarea>>>  GetTareasPendientesDeUsuarioAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            var tareas = await _repoTarea.ObtenerTareasPendientesPorUsuarioIdAsync(usuarioId);
-            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("No se encuentran tareas pendientes.");
+            var resultado = await _repoTarea.ObtenerTareasPendientesPorUsuarioIdAsync(usuarioId, pagina, tamanoPagina);
+            if (!resultado.Tareas.Any()) return Result<PaginatedResult<Tarea>>.Mal("No tienes tareas pendientes.");
 
-            return Result <IEnumerable<Tarea>>.Bien(tareas);
+            var totalPaginas = (int)Math.Ceiling(resultado.TotalITems / (double)tamanoPagina);
+            
+            var paginado = new PaginatedResult<Tarea>
+            {
+                Items = resultado.Tareas,
+                Pagina = pagina,
+                TotalPaginas = totalPaginas,
+                TotalItems = resultado.TotalITems,
+                TamanoPagina = tamanoPagina
+            };
+
+            return Result<PaginatedResult<Tarea>>.Bien(paginado);
         }
 
         // Obtener tus tareas dadas. Útil para ver desde tu perfil el estado de las tareas que has mandado.
-        public async Task<Result<IEnumerable<Tarea>>> GetTareasDadasDeUsuarioAsync(int usuarioId)
+        public async Task<Result<PaginatedResult<Tarea>>>  GetTareasDadasDeUsuarioAsync(
+            int usuarioId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            var tareas = await _repoTarea.ObtenerTareasDadasPorUsuarioIdAsync(usuarioId);
-            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("No se encuentran tareas dadas por este usuario.");
+            var resultado = await _repoTarea.ObtenerTareasDadasPorUsuarioIdAsync(usuarioId, pagina, tamanoPagina);
+            if (!resultado.Tareas.Any()) return Result<PaginatedResult<Tarea>>.Mal("No se encuentran tareas dadas por este usuario.");
 
-            return Result<IEnumerable<Tarea>>.Bien(tareas);
+            var totalPaginas = (int)Math.Ceiling(resultado.TotalITems / (double)tamanoPagina);
+
+            var paginado = new PaginatedResult<Tarea>
+            {
+                Items = resultado.Tareas,
+                Pagina = pagina,
+                TotalItems = resultado.TotalITems,
+                TotalPaginas = totalPaginas,
+                TamanoPagina = tamanoPagina
+            };
+
+            return Result<PaginatedResult<Tarea>>.Bien(paginado);
         }
 
         // Obtener todas las tareas de un proyecto. Útil para ver el estado del proyecto de un solo vistazo.
-        public async Task<Result<IEnumerable<Tarea>>> GetTareasDeUnProyectoAsync(int proyectoId)
+        public async Task<Result<PaginatedResult<Tarea>>>  GetTareasDeUnProyectoAsync(
+            int proyectoId,
+            int pagina,
+            int tamanoPagina
+        )
         {
-            var tareas = await _repoTarea.ObtenerTareasDeUnProyectoAsync(proyectoId);
-            if (!tareas.Any()) return Result<IEnumerable<Tarea>>.Mal("No se encuentran tareas dadas por este usuario.");
+            var resultado = await _repoTarea.ObtenerTareasDeUnProyectoAsync(proyectoId, pagina, tamanoPagina);
+            if (!resultado.Tareas.Any()) return Result<PaginatedResult<Tarea>>.Mal("No se encuentran tareas dadas por este usuario.");
 
-            return Result<IEnumerable<Tarea>>.Bien(tareas);
+            var totalPaginas = (int)Math.Ceiling(resultado.TotalITems / (double)tamanoPagina);
+
+            var paginado = new PaginatedResult<Tarea>
+            {
+                Items = resultado.Tareas,
+                Pagina = pagina,
+                TotalItems = resultado.TotalITems,
+                TotalPaginas = totalPaginas,
+                TamanoPagina = tamanoPagina 
+            };
+
+            return Result<PaginatedResult<Tarea>>.Bien(paginado);
         }
 
         // Obtener una sola tarea. Útil para ver mas detalladamente y con más información una tarea concreta.
