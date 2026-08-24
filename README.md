@@ -140,9 +140,6 @@ La API está documentada mediante **Swagger**, permitiendo explorar y probar los
 * Roles dentro de los proyectos
 * Validación de cuentas activas/inactivas
 * Comprobación de contraseña actual antes de cambiarla
-* Identificación del usuario mediante claims del JWT
-* Control de acceso según pertenencia al proyecto
-* Roles específicos dentro de los proyectos
 
 ### 📄 Paginación
 
@@ -191,6 +188,20 @@ docker compose up --build -d
 ```
 
 Esto levantará los servicios necesarios para ejecutar TaskFlow.
+
+### 🗄️ Base de datos y migraciones
+
+TaskFlow utiliza **Entity Framework Core Code First** junto con PostgreSQL.
+
+Las migraciones de Entity Framework Core están versionadas dentro de
+`TaskFlow.Infrastructure/Migrations`.
+
+Al iniciar la aplicación, las migraciones pendientes se aplican automáticamente
+mediante `Database.Migrate()`.
+
+De esta forma, al clonar el proyecto y ejecutar Docker Compose, la base de datos
+queda preparada automáticamente sin necesidad de ejecutar manualmente
+`dotnet ef database update`.
 
 ---
 
@@ -373,9 +384,9 @@ La API puede explorarse y probarse mediante la interfaz de **Swagger / OpenAPI**
 ## Autenticación
 
 1. Crea un usuario.
-2. Logeate.
-3. Copia la clave JWT par autorizarte.
-4. Accede a cualquier endpoint y testea!
+2. Inicia sesión.
+3. Copia el token JWT para autorizarte.
+4. Accede a cualquier endpoint protegido y pruébalo.
 
 <img src=".images/USERS.png" style="width:600px;">
 
