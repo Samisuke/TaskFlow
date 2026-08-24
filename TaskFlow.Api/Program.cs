@@ -39,6 +39,15 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
+// Migraciones automáticas
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<TaskFlowDbContext>();
+
+    dbContext.Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
