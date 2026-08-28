@@ -2,5 +2,6 @@
   <Project Path="TaskFlow.Api/TaskFlow.Api.csproj" />
   <Project Path="TaskFlow.Core/TaskFlow.Core.csproj" />
   <Project Path="TaskFlow.Infrastructure/TaskFlow.Infrastructure.csproj" />
+  <Project Path="TaskFlow.IntegrationTests/TaskFlow.IntegrationTests.csproj" />
   <Project Path="TaskFlow.Tests/TaskFlow.Tests.csproj" />
 </Solution>
