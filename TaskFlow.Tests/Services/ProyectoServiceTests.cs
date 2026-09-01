@@ -24,17 +24,17 @@ public class ProyectoServiceTests
     }
 
     [Fact]
-    public async Task GetProyectosDeUnaPersonaAsync_CuandoNoTieneProyectos_DebeFallar()
+    public async Task GetProyectosPorIdUsuarioAsync_CuandoNoTieneProyectos_DebeFallar()
     {
         using var context = TestDbContextFactory.Create();
         var repo = Substitute.For<IProyectoRepository>();
         repo.ObtenerProyectosDeUnUsuarioAsync(2).Returns(Array.Empty<Proyecto>());
         var sut = CreateSut(context, repo: repo);
 
-        var result = await sut.GetProyectosDeUnaPersonaAsync(2);
+        var result = await sut.GetProyectosPorIdUsuarioAsync(2);
 
         Assert.False(result.EsCorrecto);
-        Assert.Equal("Este usuario no pertenece a ningún proyecto aun.", result.MensajeError);
+        Assert.Equal("El usuario que buscas no existe.", result.MensajeError);
     }
 
     [Fact]

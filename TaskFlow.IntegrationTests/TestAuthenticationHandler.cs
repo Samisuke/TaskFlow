@@ -8,11 +8,12 @@ namespace TaskFlow.IntegrationTests;
 
 public class TestAuthenticationOptions
 {
-    public int UserId { get; set; }
 }
 
 public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
+
+    public static int UserId{get; set;} = 1;
     public TestAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
@@ -25,7 +26,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "1"),
+            new Claim(ClaimTypes.NameIdentifier, UserId.ToString()),
             new Claim(ClaimTypes.Name, "Nombre User"),
             new Claim(ClaimTypes.Email, "test@testmail.com")
         };

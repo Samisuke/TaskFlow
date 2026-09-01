@@ -5,6 +5,7 @@ using TaskFlow.Core.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using TaskFlow.Core.Validations;
+using TaskFlow.Core.Repositories;
 
 // Notas para un posible reclutador:
 //
@@ -45,7 +46,8 @@ namespace TaskFlow.Api.Controllers
             IProyectoService proyectoService,
             ProyectoValidator validator,
             ProyectoPatchValidator validatorPatch,
-            ProyectoPatchDueñoValidator validatorDueño
+            ProyectoPatchDueñoValidator validatorDueño,
+            IUsuarioRepository repoUsuario
         )
         {
             _proyectoService = proyectoService;
@@ -70,8 +72,8 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosDeUsuario(int usuarioId)
         {
-            var proyectos = await _proyectoService.GetProyectosDeUnaPersonaAsync(usuarioId);
-            if (!proyectos.EsCorrecto || proyectos.Valor is null) return NotFound(proyectos.MensajeError);
+            var proyectos = await _proyectoService.GetProyectosPorIdUsuarioAsync(usuarioId);
+            if(!proyectos.EsCorrecto || proyectos.Valor is null) return NotFound(proyectos.MensajeError);
 
             return Ok(proyectos.Valor.Adapt<IEnumerable<ProyectoReadDto>>());
         }
@@ -93,8 +95,7 @@ namespace TaskFlow.Api.Controllers
         public async Task<ActionResult<IEnumerable<ProyectoReadDto>>> GetProyectosPropios()
         {
             var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var proyectos = await _proyectoService.GetProyectosDeUnaPersonaAsync(idJWT);
-            if (!proyectos.EsCorrecto || proyectos.Valor is null) return NotFound(proyectos.MensajeError);
+            var proyectos = await _proyectoService.GetProyectosPorIdUsuarioAsync(idJWT);
 
             return Ok(proyectos.Valor.Adapt<IEnumerable<ProyectoReadDto>>());
         }

@@ -9,7 +9,7 @@ namespace TaskFlow.Core.Services
     {
         // Métodos GET
         Task<Result<Proyecto>> GetProyectoPorIdAsync(int id);
-        Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int usuarioId);
+        Task<Result<IEnumerable<Proyecto>>> GetProyectosPorIdUsuarioAsync(int usuarioId);
         Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int creadorId);
 
         // Métodos POST

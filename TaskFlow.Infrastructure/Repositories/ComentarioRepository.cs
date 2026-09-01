@@ -31,7 +31,7 @@ namespace TaskFlow.Infrastructure.Repositories
             var comentarios = await query
                 .OrderBy(c => c.Id)
                 .Skip((pagina - 1) * tamanoPagina)
-                .Take(pagina)
+                .Take(tamanoPagina)
                 .ToListAsync();
             
             return (comentarios, totalItems);
@@ -52,7 +52,7 @@ namespace TaskFlow.Infrastructure.Repositories
             var comentarios = await query
                 .OrderBy(c => c.Id)
                 .Skip((pagina - 1) * tamanoPagina)
-                .Take(pagina)
+                .Take(tamanoPagina)
                 .ToListAsync();   
             
             return (comentarios, totalItems);

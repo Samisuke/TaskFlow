@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using TaskFlow.Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 
 
 
@@ -51,6 +52,18 @@ namespace TaskFlow.IntegrationTests
                     "TestAuthentication",
                     options => { });
             });
+        }
+
+        // Metodo para resetear la base de datos manteniendo la estructura
+        public async Task ResetDatabaseAsync()
+        {
+            using var scope = Services.CreateScope();
+
+            var context = scope.ServiceProvider
+                .GetRequiredService<TaskFlowDbContext>();
+            
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.MigrateAsync();
         }
 
         public TaskFlowDbContext GetDbContext()

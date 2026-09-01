@@ -46,11 +46,12 @@ namespace TaskFlow.Infrastructure.Services
             return Result<Proyecto>.Bien(proyecto);
         }
 
-        // Obtener proyectos a los que pertenece una persona. Útil para ver los proyectos de un contácto.
-        public async Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnaPersonaAsync(int usuarioId)
+        // Obtener proyectos propios. No hace comprobaciones porque devolver una lista vacia es algo aceptable.
+        public async Task<Result<IEnumerable<Proyecto>>> GetProyectosPorIdUsuarioAsync(int usuarioId)
         {
+            var usuario = await _repoUsuario.ObtenerUsuarioPorIdAsync(usuarioId);
+            if (usuario is null) return Result<IEnumerable<Proyecto>>.Mal("El usuario que buscas no existe.");
             var proyectos = await _repoProyecto.ObtenerProyectosDeUnUsuarioAsync(usuarioId);
-            if (!proyectos.Any()) return Result<IEnumerable<Proyecto>>.Mal("Este usuario no pertenece a ningún proyecto aun.");
 
             return Result<IEnumerable<Proyecto>>.Bien(proyectos);
         }
