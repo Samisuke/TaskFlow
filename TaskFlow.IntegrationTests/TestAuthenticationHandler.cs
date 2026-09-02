@@ -13,7 +13,8 @@ public class TestAuthenticationOptions
 public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
 
-    public static int UserId{get; set;} = 1;
+    public static int UserId {get; set;} = 1;
+
     public TestAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,

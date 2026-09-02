@@ -1,5 +1,12 @@
 # Changelog
 
+## - 2026-09-02
+### Añadido
+- Tests de integración para proyecto terminados.
+- Corrección de modelo de negocio: Ahora, para que un usuario pueda ver un proyecto por ID, necesita pertenecer al mismo.
+
+
+
 ## - 2026-09-01
 ### Añadido
 - Tests de integración para proyecto aumentados.

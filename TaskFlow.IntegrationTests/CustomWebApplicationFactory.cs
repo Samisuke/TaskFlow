@@ -66,16 +66,17 @@ namespace TaskFlow.IntegrationTests
             await context.Database.MigrateAsync();
         }
 
-        public TaskFlowDbContext GetDbContext()
+        public async Task ExecuteDbContextAsync(
+            Func<TaskFlowDbContext, Task> action)
         {
-            // Creamos un scope dentro de la factory
-            var scope = Services.CreateScope();
+            // Creamos el scope que viva solo mientras se ejecute el bloque
+            await using var scope = Services.CreateAsyncScope();
+            
+            var context = scope.ServiceProvider
+                .GetRequiredService<TaskFlowDbContext>();
 
-            // Creamos el context dentro de este scope
-            var context = scope.ServiceProvider.GetRequiredService<TaskFlowDbContext>();
-
-            return context;
-        } 
+            await action(context);
+        }
         
 
         // Borramos el container

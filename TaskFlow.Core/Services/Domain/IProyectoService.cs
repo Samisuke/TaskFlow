@@ -8,7 +8,7 @@ namespace TaskFlow.Core.Services
     public interface IProyectoService
     {
         // Métodos GET
-        Task<Result<Proyecto>> GetProyectoPorIdAsync(int id);
+        Task<Result<Proyecto>> GetProyectoPorIdAsync(int proyectoId, int usuarioId);
         Task<Result<IEnumerable<Proyecto>>> GetProyectosPorIdUsuarioAsync(int usuarioId);
         Task<Result<IEnumerable<Proyecto>>> GetProyectosDeUnCreadorAsync(int creadorId);
 

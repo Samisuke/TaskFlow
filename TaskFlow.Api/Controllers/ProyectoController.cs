@@ -61,8 +61,16 @@ namespace TaskFlow.Api.Controllers
         [Authorize]
         public async Task<ActionResult<ProyectoReadDto>> GetProyecto(int proyectoId)
         {
-            var proyecto = await _proyectoService.GetProyectoPorIdAsync(proyectoId);
-            if (!proyecto.EsCorrecto || proyecto.Valor is null) return NotFound(proyecto.MensajeError);
+            var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var proyecto = await _proyectoService.GetProyectoPorIdAsync(proyectoId, idJWT);
+
+            // Este parche no es óptimo ni escalable, se centralizarán las respuestas 
+            // HTTP en futuras versiones.
+            if (!proyecto.EsCorrecto || proyecto.Valor is null)
+            {
+                if (proyecto.MensajeError == ("No existe el proyecto.")) return NotFound(proyecto.MensajeError);
+                if (proyecto.MensajeError == ("No perteneces al proyecto.")) return Unauthorized(proyecto.MensajeError);
+            }
 
             return Ok(proyecto.Valor.Adapt<ProyectoReadDto>());  
         }
@@ -96,6 +104,14 @@ namespace TaskFlow.Api.Controllers
         {
             var idJWT = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var proyectos = await _proyectoService.GetProyectosPorIdUsuarioAsync(idJWT);
+
+            // Este parche no es óptimo ni escalable, se centralizarán las respuestas 
+            // HTTP en futuras versiones.
+            if (!proyectos.EsCorrecto || proyectos.Valor is null)
+            {
+                if (proyectos.MensajeError == "No existe el proyecto.") return NotFound (proyectos.MensajeError);
+                if (proyectos.MensajeError == "No perteneces al proyecto.") return Unauthorized(proyectos.MensajeError);
+            }
 
             return Ok(proyectos.Valor.Adapt<IEnumerable<ProyectoReadDto>>());
         }

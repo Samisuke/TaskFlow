@@ -38,10 +38,12 @@ namespace TaskFlow.Infrastructure.Services
 
         // Métodos GET
         // Obtener un proyecto por ID
-        public async Task<Result<Proyecto>> GetProyectoPorIdAsync(int id)
+        public async Task<Result<Proyecto>> GetProyectoPorIdAsync(int proyectoId, int usuarioId)
         {
-            var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(id);
-            if (proyecto is null) return Result<Proyecto>.Mal("No existe el proyecto,");
+            if(!await _proyectoPermission.EsMiembroActivoAsync(proyectoId, usuarioId)) return Result<Proyecto>.Mal("No perteneces al proyecto.");
+
+            var proyecto = await _repoProyecto.ObtenerProyectoPorIdAsync(proyectoId);
+            if (proyecto is null) return Result<Proyecto>.Mal("No existe el proyecto.");
 
             return Result<Proyecto>.Bien(proyecto);
         }

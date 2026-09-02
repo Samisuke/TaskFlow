@@ -17,10 +17,10 @@ public class ProyectoServiceTests
         repo.ObtenerProyectoPorIdAsync(1).Returns((Proyecto?)null);
         var sut = CreateSut(context, repo: repo);
 
-        var result = await sut.GetProyectoPorIdAsync(1);
+        var result = await sut.GetProyectoPorIdAsync(1, 1);
 
         Assert.False(result.EsCorrecto);
-        Assert.Equal("No existe el proyecto,", result.MensajeError);
+        Assert.Equal("No perteneces al proyecto.", result.MensajeError);
     }
 
     [Fact]

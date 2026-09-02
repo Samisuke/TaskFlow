@@ -7,14 +7,14 @@ using System.Text.Json;
 using TaskFlow.Core.Dto.Proyecto;
 using System.Net.Http.Json;
 
-namespace TaskFlow.IntegrationTests.Proyectos
+namespace TaskFlow.IntegrationTests.ProyectoTest
 {
-    public class ProyectosTests : IClassFixture<CustomWebApplicationFactory>
+    public class ProyectoTests : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory _factory;
         // Recibimos la Factory
-        public ProyectosTests(
+        public ProyectoTests(
             CustomWebApplicationFactory factory)
         {   
             // _client es un cliente para el entorno de pruebas.
@@ -27,8 +27,6 @@ namespace TaskFlow.IntegrationTests.Proyectos
         {
             // Limpieza de BD entre cada test.
             await _factory.ResetDatabaseAsync();
-            // Obtenemos el context
-            var context = _factory.GetDbContext();
 
             // Arrange
             var usuario = new Usuario
@@ -53,7 +51,7 @@ namespace TaskFlow.IntegrationTests.Proyectos
                 Descripcion = "Test Desc.",
                 FechaCreacion = DateTime.UtcNow,
                 PropietarioId = 1,
-                Propietario = null,
+                Propietario = usuario,
                 Tareas = [],
                 Usuarios = [],
                 Historiales = []
@@ -70,21 +68,21 @@ namespace TaskFlow.IntegrationTests.Proyectos
                 Activo = true,
             };
 
-            await context.Usuarios.AddAsync(usuario);
-            await context.Proyectos.AddAsync(proyecto);
-            await context.ProyectoUsuario.AddAsync(proyectoUsuario);
-            await context.SaveChangesAsync();
+            // Guardamos todo en el context
+            await _factory.ExecuteDbContextAsync(async context =>
+            {
+                await context.Usuarios.AddAsync(usuario);
+                await context.Proyectos.AddAsync(proyecto);
+                await context.ProyectoUsuario.AddAsync(proyectoUsuario);
+                await context.SaveChangesAsync();
+            });
 
             // Act
+            TestAuthenticationHandler.UserId = 1;
             var response = await _client.GetAsync("/api/proyecto/mis-proyectos");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-            var body = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"STATUS: {response.StatusCode}");
-            Console.WriteLine($"BODY: {body}");
 
             var proyectos = await response.Content.ReadFromJsonAsync<List<ProyectoReadDto>>();
 
@@ -103,8 +101,6 @@ namespace TaskFlow.IntegrationTests.Proyectos
         {
             // Limpieza de BD entre cada test.
             await _factory.ResetDatabaseAsync();
-
-            var context = _factory.GetDbContext();
 
             // Arrange
             var usuarioUno = new Usuario
@@ -264,20 +260,18 @@ namespace TaskFlow.IntegrationTests.Proyectos
                 proyectoUsuarioUno, proyectoUsuarioDos, proyectoUsuarioTres,
                 proyectoUserUnoenTres, proyectoUserUnoenDos, proyectoUserDosenUno];
 
-            await context.Usuarios.AddRangeAsync(listaUsuarios);
-            await context.Proyectos.AddRangeAsync(listaProyectos);
-            await context.ProyectoUsuario.AddRangeAsync(listaProyectoUsuarios);
-
-            await context.SaveChangesAsync();
+            // Guardamos todo en el context
+            await _factory.ExecuteDbContextAsync(async context =>
+            {
+                await context.Usuarios.AddRangeAsync(listaUsuarios);
+                await context.Proyectos.AddRangeAsync(listaProyectos);
+                await context.ProyectoUsuario.AddRangeAsync(listaProyectoUsuarios);
+                await context.SaveChangesAsync();
+            });
 
             // Act
             TestAuthenticationHandler.UserId = usuarioId;
             var response = await _client.GetAsync("/api/proyecto/mis-proyectos");
-
-            var body = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"STATUS: {response.StatusCode}");
-            Console.WriteLine($"BODY: {body}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -295,8 +289,6 @@ namespace TaskFlow.IntegrationTests.Proyectos
         public async Task GetMisProyectosSinTenerNinguno_ReturnsOkEmpty()
         {
             await _factory.ResetDatabaseAsync();
-
-            var context = _factory.GetDbContext();
             
             // Arrange
             var usuario = new Usuario
@@ -314,17 +306,16 @@ namespace TaskFlow.IntegrationTests.Proyectos
                 TareasCreadas = [],  
             };
 
-            await context.Usuarios.AddAsync(usuario);
-            await context.SaveChangesAsync();
+            // Guardamos todo en el context
+            await _factory.ExecuteDbContextAsync(async context =>
+            {
+                await context.Usuarios.AddAsync(usuario);
+                await context.SaveChangesAsync();
+            });
 
             // Act
             TestAuthenticationHandler.UserId = usuario.Id;
             var response = await _client.GetAsync("/api/proyecto/mis-proyectos");
-            
-            var body = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"STATUS: {response.StatusCode}");
-            Console.WriteLine($"BODY: {body}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -333,6 +324,84 @@ namespace TaskFlow.IntegrationTests.Proyectos
 
             proyectos.Should().NotBeNull();
             proyectos.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetProyectoDondeNoPerteneces_ReturnsUnauthorized()
+        {
+            await _factory.ResetDatabaseAsync();
+
+            // Arrange
+            var usuarioUno = new Usuario
+            {
+                Id = 1,
+                Nombre = "Nombre Uno",
+                Apellidos = "Apellidos User",
+                Email = "test1@testmail.com",
+                PasswordHash = "!Password123!",
+                FechaRegistro = DateTime.UtcNow,
+                Activo = true,
+                Proyectos = [],
+                Comentarios = [],
+                TareasAsignadas = [],
+                TareasCreadas = [],
+            };
+        
+            var usuarioDos = new Usuario
+            {
+                Id = 2,
+                Nombre = "Nombre Dos",
+                Apellidos = "Apellidos User",
+                Email = "test2@testmail.com",
+                PasswordHash = "!Password123!",
+                FechaRegistro = DateTime.UtcNow,
+                Activo = true,
+                Proyectos = [],
+                Comentarios = [],
+                TareasAsignadas = [],
+                TareasCreadas = [],
+            };
+
+            var proyecto = new Proyecto
+            {
+                Id = 1,
+                Nombre  = "Test Nom. Uno",
+                Descripcion = "Test Desc.",
+                FechaCreacion = DateTime.UtcNow,
+                PropietarioId = 1,
+                Propietario = null,
+                Tareas = [],
+                Usuarios = [],
+                Historiales = []  
+            };
+
+            var proyectoUser = new ProyectoUsuario
+            {
+                UsuarioId = 1,
+                Usuario = usuarioUno,
+                FechaIncorporacion = DateTime.UtcNow,
+                ProyectoId = 1,
+                Proyecto = proyecto,
+                Rol = RolProyecto.Manager,
+                Activo = true,  
+            };      
+
+            List<Usuario> listaUsuario = [usuarioUno, usuarioDos];
+            // Guardamos todo en el context
+            await _factory.ExecuteDbContextAsync(async context =>
+            {
+                await context.Usuarios.AddRangeAsync(listaUsuario);
+                await context.Proyectos.AddAsync(proyecto);
+                await context.ProyectoUsuario.AddAsync(proyectoUser);
+                await context.SaveChangesAsync();
+            });
+
+            // Act
+            TestAuthenticationHandler.UserId = 2;
+            var response = await _client.GetAsync("/api/proyecto/1");
+
+            // Assert[]
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
     }
 }
