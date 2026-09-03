@@ -2,9 +2,17 @@
 
 ## - 2026-09-02
 ### Añadido
-- Tests de integración para proyecto terminados.
-- Corrección de modelo de negocio: Ahora, para que un usuario pueda ver un proyecto por ID, necesita pertenecer al mismo.
+- Tests de integración para POST proyecto terminados.
+- Creación de "Resources", archivo destinado a contener los metodos necesarios para crear datos en la BD_test de los Arranges.
+- Optimización de código y refactorización de los Arrange.
+- Documentacion de los test de integracion
+- README actualizado
 
+
+## - 2026-09-02
+### Añadido
+- Tests de integración para GET proyecto terminados.
+- Corrección de modelo de negocio: Ahora, para que un usuario pueda ver un proyecto por ID, necesita pertenecer al mismo.
 
 
 ## - 2026-09-01

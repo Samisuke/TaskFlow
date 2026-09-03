@@ -69,7 +69,7 @@ namespace TaskFlow.Api.Controllers
             if (!proyecto.EsCorrecto || proyecto.Valor is null)
             {
                 if (proyecto.MensajeError == ("No existe el proyecto.")) return NotFound(proyecto.MensajeError);
-                if (proyecto.MensajeError == ("No perteneces al proyecto.")) return Unauthorized(proyecto.MensajeError);
+                if (proyecto.MensajeError == ("No perteneces al proyecto.")) return Forbid();
             }
 
             return Ok(proyecto.Valor.Adapt<ProyectoReadDto>());  

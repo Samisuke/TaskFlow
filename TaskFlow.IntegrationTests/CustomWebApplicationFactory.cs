@@ -7,27 +7,36 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 
+// <summary>
+// Configura un entorno aislado para las pruebas de integración de la aplicación.
 
+// Utiliza WebApplicationFactory para levantar la aplicación real y Testcontainers
+// para ejecutar una instancia temporal de PostgreSQL dentro de Docker.
+
+// También sustituye la autenticación real por un esquema de autenticación específico
+// para las pruebas.
+// </summary>
 
 namespace TaskFlow.IntegrationTests
 {
-    // Creación de la Factory (entorno de pruebas) usando la configuración de nuestro Program.
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
-        // Creamos los parametros del contenedor para Docker que almacenará nuestro DB
+        // Contenedor PostgreSQL utilizado como base de datos durante las pruebas de integración.
         private readonly PostgreSqlContainer _postgreContainer = new PostgreSqlBuilder("postgres:17")
             .WithDatabase("taskflow_test")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
 
-        // Iniciamos el container
+        // Inicia el contenedor de PostgreSQL antes de ejecutar las pruebas.
         public async Task InitializeAsync()
         {
             await _postgreContainer.StartAsync();
         }
 
-        // Configuraciones.
+        // Configura la aplicación para ejecutarse en el entorno de pruebas.
+        // Sustituye la cadena de conexión de producción por la del contenedor PostgreSQL
+        // y reemplaza el sistema de autenticación real por el utilizado en las pruebas.
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             // Usamos el DB_test, no el DB de producción.
@@ -54,7 +63,9 @@ namespace TaskFlow.IntegrationTests
             });
         }
 
-        // Metodo para resetear la base de datos manteniendo la estructura
+        // Restablece el estado de la base de datos de pruebas eliminándola y aplicando
+        ///nuevamente las migraciones de Entity Framework Core. 
+        /// De esta forma, cada prueba comienza con un estado conocido y aislado.
         public async Task ResetDatabaseAsync()
         {
             using var scope = Services.CreateScope();
@@ -66,10 +77,13 @@ namespace TaskFlow.IntegrationTests
             await context.Database.MigrateAsync();
         }
 
+        // Ejecuta una operación sobre el DbContext dentro de un ámbito controlado de
+        // inyección de dependencias, garantizando la liberación de los servicios con
+        // ciclo de vida Scoped al finalizar la operación.
         public async Task ExecuteDbContextAsync(
             Func<TaskFlowDbContext, Task> action)
         {
-            // Creamos el scope que viva solo mientras se ejecute el bloque
+            // Creamos el scope para que viva solo mientras se ejecute el bloque
             await using var scope = Services.CreateAsyncScope();
             
             var context = scope.ServiceProvider
@@ -79,7 +93,7 @@ namespace TaskFlow.IntegrationTests
         }
         
 
-        // Borramos el container
+        // Libera el contenedor PostgreSQL utilizado durante las pruebas.
         public new async Task DisposeAsync()
         {
             await _postgreContainer.DisposeAsync();

@@ -4,6 +4,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 
+// <summary>
+// Manejador de autenticación utilizado exclusivamente durante las pruebas de integración. 
+// Sustituye el mecanismo de autenticación real por uno controlado que genera
+// las credenciales del usuario simulado, permitiendo probar endpoints protegidos
+// sin depender de tokens JWT reales.
+// </summary>
+
 namespace TaskFlow.IntegrationTests;
 
 public class TestAuthenticationOptions
@@ -12,7 +19,7 @@ public class TestAuthenticationOptions
 
 public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-
+    // Identificador del usuario que se simula como autenticado durante la prueba.
     public static int UserId {get; set;} = 1;
 
     public TestAuthenticationHandler(
@@ -23,6 +30,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
     {
     }
 
+    // Genera una identidad autenticada con los claims necesarios para la aplicación.
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var claims = new[]

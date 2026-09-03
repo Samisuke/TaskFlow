@@ -394,15 +394,33 @@ La API puede explorarse y probarse mediante la interfaz de **Swagger / OpenAPI**
 
 # 🧪 Testing
 
-TaskFlow cuenta con un proyecto independiente de tests, organizados por diferentes áreas de la aplicación, incluyendo:
+TaskFlow cuenta con un proyecto independiente de tests que combina pruebas unitarias y pruebas de integración, con el objetivo de detectar regresiones y verificar el comportamiento de los principales componentes y flujos de la aplicación.
 
-* Tests de servicios
-* Tests de reglas de negocio
-* Tests de permisos
-* Tests de escenarios correctos y erróneos
-* Helpers y utilidades de testing
+### Tests unitarios
+* Tests de servicios.
+* Tests de reglas de negocio.
+* Tests de permisos y autorización.
+* Tests de escenarios correctos y erróneos.
+* Helpers y utilidades de testing.
+Para estas pruebas se utilizan xUnit, FluentAssertions y NSubstitute.
 
-El objetivo es proporcionar una capa de seguridad frente a regresiones y comprobar el comportamiento de componentes importantes de la aplicación.
+### Tests de integración
+* ASP.NET Core WebApplicationFactory para levantar la aplicación en un entorno de pruebas.
+* HttpClient para realizar peticiones contra la API.
+* Testcontainers para ejecutar una instancia temporal de PostgreSQL mediante Docker.
+* Entity Framework Core para aplicar las migraciones y trabajar con la base de datos de pruebas.
+* Un sistema de autenticación específico para testing que permite simular diferentes usuarios y comprobar escenarios de autenticación y autorización.
+* La base de datos se restablece entre las pruebas de integración para garantizar que cada escenario parte de un estado conocido y aislado.
+
+### Entre los escenarios probados se incluyen:
+* Obtención de proyectos del usuario autenticado.
+* Filtrado de proyectos según la pertenencia del usuario.
+* Usuarios sin proyectos.
+* Control de acceso a proyectos mediante autorización.
+* Respuestas 403 Forbidden cuando un usuario intenta acceder a recursos a los que no tiene acceso.
+* Persistencia y consulta de datos utilizando PostgreSQL.
+* Autenticación de diferentes usuarios durante las pruebas.
+* Aplicación de migraciones de Entity Framework Core sobre la base de datos de pruebas.
 
 ### Ejecutar los tests
 
